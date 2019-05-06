@@ -6,28 +6,39 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Multiplayer Rock Paper Scissors</title>
 
+    <!-- jQuery link -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    
+    <!-- Firebase Reference -->
+    <script src="https://www.gstatic.com/firebasejs/5.11.0/firebase.js"></script>
+    
     <!-- Bootstrap -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
-
+    
     <!-- Custom Stylesheet-->
     <link rel="stylesheet" href="style.css">
-
+    
 </head>
 <body>
     
+    <div class="container">
+        
+        <input type="text" id="nameChoice1" placeholder="Player 1 name" size="25">
+        <button class="btn btn-default" id="name-set1" type="submit">Set</button>
 
+        <input type="text" id="nameChoice2" placeholder="Player 2 name" size="25">
+        <button class="btn btn-default" id="name-set2" type="submit">Set</button>
+        
+        <div id="firebase-log">
+            <span id="name1">Player 1 Name</span><br>
+            <span id="name2">Player 2 Name</span>
 
+        </div>
+        
+    </div>
     
-<!-- Firebase link -->
-<script src="https://www.gstatic.com/firebasejs/5.11.1/firebase-app.js"></script>
-
-<!-- jQuery link -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-
 <!--linking Javascript-->
 <script type="text/javascript" src="app.js"></script> 
 
-<!-- TODO: Add SDKs for Firebase products that you want to use
-     https://firebase.google.com/docs/web/setup#config-web-app -->
 </body>
 </html>
