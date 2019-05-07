@@ -17,6 +17,11 @@ const database = firebase.database();
 // Initialize global variables
 let player1Name = "";
 let player2Name = "";
+let score = 0;
+let livesRemaining = 5;
+let currentRound = 0;
+let successfulMatches = [];
+let unsuccessfulMatches = [];
 
 // Game functions
 const game = {
@@ -36,59 +41,166 @@ const game = {
                 let newSrc = response.data.fixed_height_downsampled_url;
                 $("#gif").attr("src", newSrc)
             })
-    }   
+    },
+    
+    // Clears current answers in firebase
+    clearCurrentAnswers: function() {
+        database.ref().child("currentAnswers").update({
+            playerOneAnswer: "",
+            playerTwoAnswer: ""
+        });
+    },
+
+    // Update score
+    increaseScore: function() {
+        score++;
+        $("#score").text(score);
+        game.clearCurrentAnswers();
+    },
+
+    //Update lives remaining
+    decrementLives: function() {
+        livesRemaining--;
+        
+        if (livesRemaining === 0) {
+            game.nextRound();
+            game.clearCurrentAnswers();
+        } else {
+            $("#lives-remaining").text(livesRemaining);
+            game.clearCurrentAnswers();
+        }
+    },
+
+    // Reset round and lives
+    nextRound: function() {
+        currentRound++;
+
+        // Check if the game is over
+        if (currentRound > 10) {
+            //game.endGame();
+        } else {
+            $("#current-round").text(currentRound)
+            livesRemaining = 5;
+            $("#lives-remaining").text(livesRemaining);
+        }
+    }
 }
 
-// Creates users node if it doesn't already exist on pageload
+// Grab and display names of last players who played
 database.ref().once("value", function (snapshot) {
     
-    // Grab and display stored player names
-    if (snapshot.child("users").exists()) {
-        
-        player1NameStored = snapshot.val().users.player1;
-        player2NameStored = snapshot.val().users.player2;
+    player1NameStored = snapshot.val().currentUsers.player1;
+    player2NameStored = snapshot.val().currentUsers.player2;
 
-        $("#name1").text(player1NameStored)
-        $("#name2").text(player2NameStored)
+    $("#name1").text(player1NameStored)
+    $("#name2").text(player2NameStored)
 
-        return;
-    // If there is no users node, create placeholder names
-    } else {
-        database.ref().set( {
-            users: {
-                player1: "Player 1",
-                player2: "Player 2",
-            }
-        })
-    }
 })
 
 // Event listeners
 
+    // Answer submission listeners
+    $("#player-1-answer").on("click", function () {
+        event.preventDefault();
+        let answer = $("#answer1").val();
 
-$("#name-set1").on("click", function () {
-    event.preventDefault();
-    newNamePlayer1 = $("#nameChoice1").val();
-    database.ref().child("users").update(
-        {player1: newNamePlayer1}, 
-    );
-    game.updatePlayerName("#name1", newNamePlayer1);
-})
+        // In case the form is left empty, don't ping database
+        if (answer === "") {
+            alert("Type an answer before submitting!")
+        } 
+            // Otherwise, ping firebase 
+            else {
+                //Update answer in database
+                database.ref().child("currentAnswers").update(
+                    {playerOneAnswer: answer}, 
+                );
 
-$("#name-set2").on("click", function () {
-    event.preventDefault();
-    newNamePlayer2 = $("#nameChoice2").val();
-    database.ref().child("users").update(
-        {player2: newNamePlayer2}, 
-    );
-    game.updatePlayerName("#name2", newNamePlayer2);
-})
+                // Then check if there's an answer from playerTwo
+                database.ref().on("value", function (snapshot) {
+                    playerTwoAnswer = snapshot.val().currentAnswers.playerTwoAnswer;
 
-database.ref().on("child_added", function (snapshot) {
-    let snap = snapshot.val();
-    $("#firebase-log").prepend(snap.chat)
+                    // If there's no answer yet, display waiting message
+                    if (playerTwoAnswer === "") {
+                        alert("Answer submitted. Waiting on player2...")
+                        //update this to status in HTML
+                    } 
+                        // If there is an answer, check if they match
+                        else {
+                            if (answer === playerTwoAnswer) {
+                                alert("it's a match! you both guessed " + answer + "!");
+                                $("#successful-matches ul").append("<li>" + answer + "</li>");
+                                game.increaseScore();
+                            } else {
+                                alert("the other player guessed " + playerTwoAnswer + " instead");
+                                $("#unsuccessful-matches ul").append("<li>" + answer + "</li>");
+                                game.decrementLives();
+                            }
+                        }
+                    })
+            }
+    })
+
+    $("#player-2-answer").on("click", function () {
+        event.preventDefault();
+        let answer = $("#answer2").val();
+
+        // In case the form is left empty, don't ping database
+        if (answer === "") {
+            alert("Type an answer before submitting!")
+        } 
+            // Otherwise, ping firebase 
+            else {
+                //Update answer in database
+                database.ref().child("currentAnswers").update(
+                    {playerTwoAnswer: answer}, 
+                );
+
+                // Then check if there's an answer from playerTwo
+                database.ref().on("value", function (snapshot) {
+                    playerOneAnswer = snapshot.val().currentAnswers.playerOneAnswer;
+
+                    // If there's no answer yet, display waiting message
+                    if (playerOneAnswer === "") {
+                        alert("Answer submitted. Waiting on player2...")
+                        //update this to status in HTML
+                    } 
+                        // If there is an answer, check if they match
+                        else {
+                            if (answer === playerOneAnswer) {
+                                alert("it's a match! you both guessed " + answer + "!");
+                                $("#successful-matches ul").append("<li>" + answer + "</li>");
+                                game.increaseScore();
+                            } else {
+                                alert("the other player guessed " + playerOneAnswer + " instead");
+                                $("#unsuccessful-matches ul").append("<li>" + answer + "</li>");
+                                game.decrementLives();
+                            }
+                        }
+                    })
+            }
+    })
+
+
+    // Name change listeners
+    $("#name-set1").on("click", function () {
+        event.preventDefault();
+        newNamePlayer1 = $("#nameChoice1").val();
+        database.ref().child("currentUsers").update(
+            {player1: newNamePlayer1}, 
+        );
+        game.updatePlayerName("#name1", newNamePlayer1);
+    })
+
+    $("#name-set2").on("click", function () {
+        event.preventDefault();
+        newNamePlayer2 = $("#nameChoice2").val();
+        database.ref().child("currentUsers").update(
+            {player2: newNamePlayer2}, 
+        );
+        game.updatePlayerName("#name2", newNamePlayer2);
+    })
 
     // Handle the errors
-    }, function(errorObject) {
-    console.log("Errors handled: " + errorObject.code);
-  });
+//     }, function(errorObject) {
+//     console.log("Errors handled: " + errorObject.code);
+//   });
