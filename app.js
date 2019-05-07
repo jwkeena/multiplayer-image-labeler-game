@@ -21,8 +21,55 @@ let player2Name = "";
 // Game functions
 const game = {
     updatePlayerName: function (spanID, newName) {
-        $(spanID).text(newName)
-    }
+        $(spanID).text(newName);
+    },
+
+    newGif: function() {
+        $.ajax(
+            {url: "https://api.giphy.com/v1/gifs/random?&q=&api_key=0390oddk4iEFytYmuT0Y4rBFADo3F1j0&rating=pg-13",
+            method: "GET"})
+            .then(function (response) {
+                console.log(response.data)
+                let newSrc = response.data.fixed_height_downsampled_url;
+                $("#gif").attr("src", newSrc)
+            })
+    }   
+}
+
+//calls GIFS from the GIPHY API
+function getGIFS (queryURL) {
+    $.ajax(
+        {url: queryURL,
+        method: "GET"})
+        .then(function (response) {
+            console.log(response.data)
+            let data = response.data;
+            for (i=0; i < data.length; i++){
+
+                //building new imageWrapper (to allow absolute position of rating)
+                var imageWrapper = $("<div>")
+                imageWrapper.css("position", "relative");
+                imageWrapper.css("display", "inline-block");
+                $(".gifs").prepend(imageWrapper);
+
+                //building new gif
+                var newImage = $("<img>");
+                newImage.css("display", "inline-block");
+                newImage.attr("class", "gif");
+                newImage.attr("data-state", "still");
+                newImage.attr("src", data[i].images.fixed_height_small_still.url);
+                newImage.attr("data-still", data[i].images.fixed_height_small_still.url);
+                newImage.attr("data-animate", data[i].images.fixed_height_small.url);
+                imageWrapper.append(newImage)
+
+                //attaching rating to each gif
+                var newRating = $("<p>");
+                newRating.text(data[i].rating);
+                newRating.attr("class", "rating");
+                imageWrapper.append(newRating);
+            }
+        }
+    )
 }
 
 // Creates users node if it doesn't already exist on pageload
@@ -49,6 +96,8 @@ database.ref().once("value", function (snapshot) {
     }
 })
 
+// Event listeners
+
 
 $("#name-set1").on("click", function () {
     event.preventDefault();
@@ -67,7 +116,6 @@ $("#name-set2").on("click", function () {
     );
     game.updatePlayerName("#name2", newNamePlayer2);
 })
-
 
 database.ref().on("child_added", function (snapshot) {
     let snap = snapshot.val();

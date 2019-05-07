@@ -23,15 +23,72 @@
     
     <div class="container">
         
-        <input type="text" id="nameChoice1" placeholder="Player 1 name" size="25">
-        <button class="btn btn-default" id="name-set1" type="submit">Set</button>
+        <div class="row">
+            <div class="card text-center">
+                <div class="card-header">
+                    Word Match Game
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Current Gif</h5>
+                    <p class="card-text">Describe the image using as many words or phrases as your online partner. Each exactly matching word wins a point; each incorrect guess loses a life. Three lives are given per round. At the end of ten rounds, the total score is tallied. Try to get a high score!</p>
+                    <div class="text-center">
+                    <img src="placeholder.png" class="rounded" alt="placeholder" id="gif">
+                    </div>
+                    <br>
+                    <button class="btn btn-primary" onclick="game.newGif();">New gif</button>
+                </div>
+                <div class="card-footer text-muted">
+                   Score: | Lives Remaining: 3 | Current round: 0/10 | High score: [points, team names]
+                </div>
+            </div>
+            <br>
+        </div>
 
-        <input type="text" id="nameChoice2" placeholder="Player 2 name" size="25">
-        <button class="btn btn-default" id="name-set2" type="submit">Set</button>
-        
-        <div id="firebase-log">
-            <span id="name1">Player 1 Name</span><br>
-            <span id="name2">Player 2 Name</span>
+        <div class="row">
+
+            <!--Player1 Input Area-->
+            <div class="col-md-4">
+
+                <!-- Name input -->
+                <input type="text" id="nameChoice1" placeholder="Player 1 name" size="25">
+                <button class="btn btn-default" id="name-set1" type="submit">Set</button>
+
+                <!-- Description input -->
+                <div class="md-form amber-textarea active-amber-textarea">
+                    Player 1: <span id="name1"></span>
+                    <i class="fas fa-pencil-alt prefix"></i>
+                    <textarea id="imput1" class="md-textarea form-control" rows="1"></textarea>
+                </div>
+            </div>
+
+            <!-- Successful word matches -->
+            <div class="col-md-2">
+                <ul class="list-group">
+                    <li class="list-group-item">Cras justo odio</li>
+                </ul>
+            </div>
+
+            <!-- Unsuccessful word matches -->
+            <div class="col-md-2">
+                <ul class="list-group">
+                    <li class="list-group-item">Cras justo odio</li>
+                </ul>
+            </div>
+            
+            <!--Player2 Input Area-->
+            <div class="col-md-4">
+
+                <!-- Name input -->
+                <input type="text" id="nameChoice2" placeholder="Player 2 name" size="25">
+                <button class="btn btn-default" id="name-set2" type="submit">Set</button>
+
+                <!-- Description input -->
+               <div class="md-form amber-textarea active-amber-textarea">
+                    Player 2: <span id="name2"></span>
+                    <i class="fas fa-pencil-alt prefix"></i>
+                    <textarea id="imput2" class="md-textarea form-control" rows="1"></textarea>
+                </div>
+            </div>
 
         </div>
         
