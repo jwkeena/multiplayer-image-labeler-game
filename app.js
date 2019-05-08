@@ -44,7 +44,8 @@ const game = {
     // Deletes display to prevent duplicates and rewrites all items in array to add the newest one
     updateUnsuccessfulMatches: function() {
         $("#unsuccessful-matches").empty();
-        console.log(unsuccessfulMatches);
+
+        // Increment by two, since every other item in the array is the player's name who made the guess
         for (i=0; i < unsuccessfulMatches.length; i += 2) {
             j = i + 1;
             $("#unsuccessful-matches").append("<li>" + unsuccessfulMatches[i] + " (" + unsuccessfulMatches[j] + ")</li>");
@@ -75,7 +76,7 @@ const game = {
     increaseScore: function() {
         score++;
         $("#score").text(score);
-        setTimeout(game.clearCurrentAnswers(), 1000);
+        game.clearCurrentAnswers();
     },
 
     //Update lives remaining
@@ -84,10 +85,10 @@ const game = {
         
         if (livesRemaining === 0) {
             game.nextRound();
-            setTimeout(game.clearCurrentAnswers(), 1000);
+            game.clearCurrentAnswers();
         } else {
             $("#lives-remaining").text(livesRemaining);
-            setTimeout(game.clearCurrentAnswers(), 1000);
+            game.clearCurrentAnswers();
         }
     },
 
@@ -106,6 +107,7 @@ const game = {
     }
 }
 
+// Clears current answers on page load
 game.clearCurrentAnswers();
 
 // Grab and display names of last players who played
@@ -126,7 +128,7 @@ database.ref().once("value", function (snapshot) {
 
     // Answer submission listeners
     $("#player-1-answer").on("click", function () {
-        let answer = $("#answer1").val().trim();
+        let answer = $("#answer1").val().trim().toLowerCase();
         player1WrongGuess = answer;
 
         // In case the form is left empty, don't ping database
@@ -175,7 +177,7 @@ database.ref().once("value", function (snapshot) {
     })
 
     $("#player-2-answer").on("click", function () {
-        let answer = $("#answer2").val().trim();
+        let answer = $("#answer2").val().trim().toLowerCase();
         player2WrongGuess = answer;
 
         // In case the form is left empty, don't ping database
