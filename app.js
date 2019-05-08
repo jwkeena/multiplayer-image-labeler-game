@@ -31,6 +31,22 @@ const game = {
         $(spanID).text(newName);
     },
 
+    // Deletes display to prevent duplicates and rewrites all items in array to add the newest one
+    updateSuccessfulMatches: function() {
+        $("#succesful-matches").empty();
+        for (i=0; i < successfulMatches.length; i++) {
+            $("#successful-matches ul").append("<li>" + successfulMatches[i] + "</li>");
+        }
+    },
+
+    // Deletes display to prevent duplicates and rewrites all items in array to add the newest one
+    updateUnsuccessfulMatches: function() {
+        $("#unsuccesful-matches").empty();
+        for (i=0; i < unsuccessfulMatches.length; i++) {
+            $("#unsuccessful-matches ul").append("<li>" + unsuccessfulMatches[i] + "</li>");
+        }
+    },
+
     // Gets random gif from GIPHY API
     newGif: function() {
         $.ajax(
@@ -55,7 +71,7 @@ const game = {
     increaseScore: function() {
         score++;
         $("#score").text(score);
-        game.clearCurrentAnswers();
+        setTimeout(game.clearCurrentAnswers(), 1000);
     },
 
     //Update lives remaining
@@ -64,10 +80,10 @@ const game = {
         
         if (livesRemaining === 0) {
             game.nextRound();
-            game.clearCurrentAnswers();
+            setTimeout(game.clearCurrentAnswers(), 1000);
         } else {
             $("#lives-remaining").text(livesRemaining);
-            game.clearCurrentAnswers();
+            setTimeout(game.clearCurrentAnswers(), 1000);
         }
     },
 
@@ -101,8 +117,8 @@ database.ref().once("value", function (snapshot) {
 
     // Answer submission listeners
     $("#player-1-answer").on("click", function () {
-        event.preventDefault();
         let answer = $("#answer1").val();
+        console.log(answer)
 
         // In case the form is left empty, don't ping database
         if (answer === "") {
@@ -116,7 +132,8 @@ database.ref().once("value", function (snapshot) {
                 );
 
                 // Then check if there's an answer from playerTwo
-                database.ref().on("value", function (snapshot) {
+                // MUST use .once method, otherwise promise resolves multiple times
+                database.ref().once("value", function (snapshot) {
                     playerTwoAnswer = snapshot.val().currentAnswers.playerTwoAnswer;
 
                     // If there's no answer yet, display waiting message
@@ -128,11 +145,13 @@ database.ref().once("value", function (snapshot) {
                         else {
                             if (answer === playerTwoAnswer) {
                                 alert("it's a match! you both guessed " + answer + "!");
-                                $("#successful-matches ul").append("<li>" + answer + "</li>");
+                                successfulMatches.push(answer);
+                                game.updateSuccessfulMatches();
                                 game.increaseScore();
                             } else {
                                 alert("the other player guessed " + playerTwoAnswer + " instead");
-                                $("#unsuccessful-matches ul").append("<li>" + answer + "</li>");
+                                unsuccessfulMatches.push(answer);
+                                game.updateUnsuccessfulMatches();
                                 game.decrementLives();
                             }
                         }
@@ -155,13 +174,14 @@ database.ref().once("value", function (snapshot) {
                     {playerTwoAnswer: answer}, 
                 );
 
-                // Then check if there's an answer from playerTwo
-                database.ref().on("value", function (snapshot) {
+                // Then check if there's an answer from playerOne
+                // MUST use .once method, otherwise promise resolves multiple times
+                database.ref().once("value", function (snapshot) {
                     playerOneAnswer = snapshot.val().currentAnswers.playerOneAnswer;
 
                     // If there's no answer yet, display waiting message
                     if (playerOneAnswer === "") {
-                        alert("Answer submitted. Waiting on player2...")
+                        alert("Answer submitted. Waiting on player 1...")
                         //update this to status in HTML
                     } 
                         // If there is an answer, check if they match
