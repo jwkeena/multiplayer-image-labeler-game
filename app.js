@@ -53,15 +53,24 @@ const game = {
     },
 
     // Gets random gif from GIPHY API
-    newGif: function() {
+    getNewGif: function() {
         $.ajax(
             {url: "https://api.giphy.com/v1/gifs/random?&q=&api_key=0390oddk4iEFytYmuT0Y4rBFADo3F1j0&rating=pg-13",
             method: "GET"})
             .then(function (response) {
-                console.log(response.data)
-                let newSrc = response.data.fixed_height_downsampled_url;
-                $("#gif").attr("src", newSrc)
-            })
+                let newUrl = response.data.fixed_height_downsampled_url;
+                database.ref().update({
+                    currentGifURL: newUrl
+                });
+                game.displayNewGif();
+            });
+    },
+
+    displayNewGif: function() {
+        database.ref().once("value", function (snapshot) {
+            let newSrc = snapshot.val().currentGifURL;
+            $("#gif").attr("src", newSrc);
+        })
     },
     
     // Clears current answers in firebase
