@@ -21,12 +21,7 @@ let score = 0;
 let livesRemaining = 5;
 let currentRound = 0;
 let successfulMatches = [];
-let unsuccessfulMatches = {
-    player1Guesses: [],
-    player2Guesses: [],
-    player1Name: "",
-    player2Name: ""
-};
+let unsuccessfulMatches = [];
 let player1WrongGuess = "";
 let player2WrongGuess = "";
 
@@ -47,15 +42,13 @@ const game = {
     },
 
     // Deletes display to prevent duplicates and rewrites all items in array to add the newest one
-    updateUnsuccessfulMatches: function(arrayName, playerName) {
+    updateUnsuccessfulMatches: function() {
         $("#unsuccessful-matches").empty();
-
-        for (i=0; i < unsuccessfulMatches[arrayName].length; i++) {
-            console.log("in loop");
-            $("#unsuccessful-matches").append("<li>" + unsuccessfulMatches[arrayName][i] + " (" + playerName + ")</li>");
+        console.log(unsuccessfulMatches);
+        for (i=0; i < unsuccessfulMatches.length; i += 2) {
+            j = i + 1;
+            $("#unsuccessful-matches").append("<li>" + unsuccessfulMatches[i] + " (" + unsuccessfulMatches[j] + ")</li>");
         }
-
-
     },
 
     // Gets random gif from GIPHY API
@@ -113,6 +106,8 @@ const game = {
     }
 }
 
+game.clearCurrentAnswers();
+
 // Grab and display names of last players who played
 database.ref().once("value", function (snapshot) {
     
@@ -166,11 +161,11 @@ database.ref().once("value", function (snapshot) {
                                 alert("the other player guessed " + playerTwoAnswer + " instead");
                                 
                                 // Display this player's wrong answer; then, the other's 
-                                unsuccessfulMatches.player1Guesses.push(answer);
-                                game.updateUnsuccessfulMatches("player1Guesses", player1Name);
-
-                                unsuccessfulMatches.player2Guesses.push(player2WrongGuess);
-                                game.updateUnsuccessfulMatches("player2Guesses", player2Name);
+                                unsuccessfulMatches.push(answer);
+                                unsuccessfulMatches.push(player1Name);
+                                unsuccessfulMatches.push(player2WrongGuess);
+                                unsuccessfulMatches.push(player2Name)
+                                game.updateUnsuccessfulMatches();
 
                                 game.decrementLives();
                             }
@@ -214,11 +209,11 @@ database.ref().once("value", function (snapshot) {
                             } else {
                                 alert("the other player guessed " + playerOneAnswer + " instead");
                                 // Display this player's wrong answer; then, the other's 
-                                unsuccessfulMatches.player2Guesses.push(answer);
-                                game.updateUnsuccessfulMatches("player2Guesses", player2Name);
-
-                                unsuccessfulMatches.player1Guesses.push(player1WrongGuess);
-                                game.updateUnsuccessfulMatches("player1Guesses", player1Name);
+                                unsuccessfulMatches.push(answer);
+                                unsuccessfulMatches.push(player2Name);
+                                unsuccessfulMatches.push(player1WrongGuess);
+                                unsuccessfulMatches.push(player1Name);
+                                game.updateUnsuccessfulMatches();
                                 
                                 game.decrementLives();
                             }
