@@ -20,53 +20,101 @@
     
 </head>
 <body>
-    
+ <br>
+
     <div class="container">
         
         <div class="row">
-            
-            <div class="card text-center">
-                <div class="card-header">
-                    <h2 class>Image Labeler Game</h2>
-                </div>
-                <div class="card-body">
-                    <h5 class>Rules</h5>
-                    <p class="card-text"> Describe the random gif using words or phrases that your online partner is also using at the same time. Each exactly matching word or phrase wins a point; each incorrect guess loses a life. Three lives are given per round. At the end of ten rounds, the total score is tallied. Try to get a high score!</p>
-                    <div class="text-center">
-                    <img src="placeholder.png" class="rounded" alt="placeholder" id="gif">
+
+            <div class="col-md-12">
+    
+                <div class="card text-center">
+
+                    <div class="card-header">
+                        <h2 class>Image Labeler Game</h2>
                     </div>
+                    
+                    <div class="card-body">
+                        <h5 class>Instructions</h5>
+                        <div class="parent-list">
+                            <ul class="list-group">
+                                <li>Choose player 1 or player 2.</li>
+                                <li>Set your name.</li>
+                                <li>Wait for another player to join.</li>
+                                <li>Start playing!</li>
+                            </ul>
+                        </div>
+                    
                     <br>
-                    <button class="btn btn-primary" onclick="game.getNewGif();">New gif</button>
+
+                    <h5 class>Rules</h5>
+                        <div class="parent-list">
+                            <ul class="list-group">
+                                <li>Your goal is to describe the random gif using the exact same words that your online partner has also submitted.</li>
+                                <li>Each exactly matching word or phrase wins a point; each incorrect guess loses a life.</li>
+                                <li>Three lives are given per round.</li>
+                                <li>At the end of ten rounds, the total score is tallied.</li>
+                            </ul>
+                         </div>
+    
+                    </div>
+                
                 </div>
-                <div class="card-footer text-muted">
-                   Score: <span id="score">0</span> | Lives Remaining: <span id="lives-remaining">5</span> | Current round: <span id="current-round">0</span>/10 
-                </div>
+
             </div>
-            <br>
-            
+
         </div>
 
-        <!-- New row -->
+    <br>
+
         <div class="row">
-            <!--Player1 Input Area-->
+            
+             <!--Player1 Input Area-->
+             <div class="col-md-3">
+                <br>
+                <br>
+                <br>
+                <br>
+                <br>                
+                    <!-- Description input -->
+                    <div class="md-form amber-textarea active-amber-textarea text-center">
+                        <p>PLAYER ONE: <span id="name1"></span></p>
+                        <fieldset enabled>
+                            <textarea id="answer1" class="md-textarea form-control" rows="1"></textarea><br>
+                            <button class="btn btn-default" id="player-1-answer" type="submit">Submit Answer</button>
+                        </fieldset>
+                    </div>
+            
+                </div>
+
+            <!-- Current gif display -->
             <div class="col-md-6">
-        
+                <div class="card text-center">
+                    <div class="card-header">
+                        <h2 class>Play Field</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center">
+                        <img src="placeholder.png" class="rounded" alt="placeholder" id="gif">
+                        </div>
+                        <br>
+                        <button class="btn btn-primary" onclick="game.getNewGif();">New gif</button>
+                    </div>
+                    <div class="card-footer text-muted">
+                    Score: <span id="score">0</span> | Lives Remaining: <span id="lives-remaining">5</span> | Current round: <span id="current-round">0</span>/10 
+                    </div>
+                </div>
+            </div>
+            
+            <!--Player2 Input Area-->
+            <div class="col-md-3">
+                <br>
+                <br>
+                <br>
+                <br>
+                <br>  
                 <!-- Description input -->
                 <div class="md-form amber-textarea active-amber-textarea text-center">
-                    <p>PLAYER ONE: <span id="name1"></span></p>
-                    <fieldset enabled>
-                        <textarea id="answer1" class="md-textarea form-control" rows="1"></textarea><br>
-                        <button class="btn btn-default" id="player-1-answer" type="submit">Submit Answer</button>
-                    </fieldset>
-                </div>
-        
-            </div>
-        
-            <!--Player2 Input Area-->
-            <div class="col-md-6">
-        
-               <!-- Description input -->
-               <div class="md-form amber-textarea active-amber-textarea text-center">
                     <p>PLAYER TWO: <span id="name2"></span></p>
                     <fieldset enabled>
                         <textarea id="answer2" class="md-textarea form-control" rows="1"></textarea>
@@ -75,10 +123,10 @@
                     </fieldset>
                 </div>
             </div>
-        
+
         </div>
-        
-        <hr>
+
+    <hr>
 
         <!--New row  -->
         <div class="row"> 
@@ -105,13 +153,13 @@
         </div>
         <hr>
         
-
-        <!-- New row -->
+<!--     
+        New row
         <div class = "row">
             
             <div class="col-md-3"></div>
 
-            <!-- Hi-Score Area -->
+            Hi-Score Area
             <div class="col-md-6">
                 <h2 class="text-center">HI SCORES</h2>
 
@@ -135,7 +183,8 @@
             <div class="col-md-3"></div>
         </div>
 
-        <hr>
+        <hr> 
+    -->
 
         <!-- New row -->
         <div class="row">
