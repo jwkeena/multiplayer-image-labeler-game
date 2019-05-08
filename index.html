@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+    <head>
+        <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Multiplayer Rock Paper Scissors</title>
-
+    <title>Image Labeler Game</title>
+    
     <!-- jQuery link -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     
@@ -14,11 +14,6 @@
     
     <!-- Bootstrap -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
-
-    <!-- Material Design for Bootstrap -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons">
-
-    <link rel="stylesheet" href="https://unpkg.com/bootstrap-material-design@4.1.1/dist/css/bootstrap-material-design.min.css" integrity="sha384-wXznGJNEXNG1NFsbm0ugrLFMQPWswR3lds2VeinahP8N0zJw9VWSopbjv2x7WCvX" crossorigin="anonymous">
     
     <!-- Custom Stylesheet-->
     <link rel="stylesheet" href="style.css">
@@ -29,6 +24,7 @@
     <div class="container">
         
         <div class="row">
+            
             <div class="card text-center">
                 <div class="card-header">
                     <h2 class>Image Labeler Game</h2>
@@ -47,55 +43,68 @@
                 </div>
             </div>
             <br>
+            
         </div>
 
+        <!-- New row -->
         <div class="row">
-
             <!--Player1 Input Area-->
-            <div class="col-md-4">
-
+            <div class="col-md-6">
+        
                 <!-- Description input -->
-                <div class="md-form amber-textarea active-amber-textarea">
-                    Player 1: <span id="name1"></span>
-                    
+                <div class="md-form amber-textarea active-amber-textarea text-center">
+                    <p>PLAYER ONE: <span id="name1"></span></p>
                     <fieldset enabled>
-                        <textarea id="answer1" class="md-textarea form-control" rows="1"></textarea>
+                        <textarea id="answer1" class="md-textarea form-control" rows="1"></textarea><br>
                         <button class="btn btn-default" id="player-1-answer" type="submit">Submit Answer</button>
                     </fieldset>
                 </div>
-
+        
             </div>
-
-            <!-- Successful word matches -->
-            <div class="col-md-2" id="successful-matches">
-                Successful matches
-                <ul class="list-group">
-                </ul>
-            </div>
-
-            <!-- Unsuccessful word matches -->
-            <div class="col-md-2" id="unsuccessful-matches">
-                Unsuccesful matches
-                <ul class="list-group">
-                </ul>
-            </div>
-            
+        
             <!--Player2 Input Area-->
-            <div class="col-md-4">
-
+            <div class="col-md-6">
+        
                <!-- Description input -->
-               <div class="md-form amber-textarea active-amber-textarea">
-                    Player 2: <span id="name2"></span>
+               <div class="md-form amber-textarea active-amber-textarea text-center">
+                    <p>PLAYER TWO: <span id="name2"></span></p>
                     <fieldset enabled>
                         <textarea id="answer2" class="md-textarea form-control" rows="1"></textarea>
+                        <br>
                         <button class="btn btn-default" id="player-2-answer" type="submit">Submit Answer</button>
                     </fieldset>
                 </div>
             </div>
+        
+        </div>
+        
+        <hr>
+
+        <!--New row  -->
+        <div class="row"> 
+            
+            <!-- Game Status Area -->
+            <div class="col-md-4">
+                <p class="text-center">Game Status</p>
+            </div>
+
+            <!-- Successful word matches -->
+            <div class="col-md-4 parent-list">
+                <p>Successful matches</p>
+                <ul class="list-group" id="successful-matches">
+                </ul>
+            </div>
+
+            <!-- Unsuccessful word matches -->
+            <div class="col-md-4 parent-list">
+                <p>Unsuccessful matches</p>
+                <ul class="list-group" id="unsuccessful-matches">
+                </ul>
+            </div>
 
         </div>
-
         <hr>
+        
 
         <!-- New row -->
         <div class = "row">
@@ -133,7 +142,7 @@
 
                 <div class="col-md-6">
                     <!-- New name input, player 1 -->
-                    <input type="text" id="nameChoice1" placeholder="Player 1 name" size="25">
+                    <input type="text" id="nameChoice1" placeholder="Choose Player 1 Name" size="25">
                 <button class="btn btn-default" id="name-set1" type="submit">Change Name</button>
                 </div>  
     

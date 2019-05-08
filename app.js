@@ -21,7 +21,14 @@ let score = 0;
 let livesRemaining = 5;
 let currentRound = 0;
 let successfulMatches = [];
-let unsuccessfulMatches = [];
+let unsuccessfulMatches = {
+    player1Guesses: [],
+    player2Guesses: [],
+    player1Name: "",
+    player2Name: ""
+};
+let player1WrongGuess = "";
+let player2WrongGuess = "";
 
 // Game functions
 const game = {
@@ -33,18 +40,22 @@ const game = {
 
     // Deletes display to prevent duplicates and rewrites all items in array to add the newest one
     updateSuccessfulMatches: function() {
-        $("#succesful-matches").empty();
+        $("#successful-matches").empty();
         for (i=0; i < successfulMatches.length; i++) {
-            $("#successful-matches ul").append("<li>" + successfulMatches[i] + "</li>");
+            $("#successful-matches").append("<li>" + successfulMatches[i] + "</li>");
         }
     },
 
     // Deletes display to prevent duplicates and rewrites all items in array to add the newest one
-    updateUnsuccessfulMatches: function() {
-        $("#unsuccesful-matches").empty();
-        for (i=0; i < unsuccessfulMatches.length; i++) {
-            $("#unsuccessful-matches ul").append("<li>" + unsuccessfulMatches[i] + "</li>");
+    updateUnsuccessfulMatches: function(arrayName, playerName) {
+        $("#unsuccessful-matches").empty();
+
+        for (i=0; i < unsuccessfulMatches[arrayName].length; i++) {
+            console.log("in loop");
+            $("#unsuccessful-matches").append("<li>" + unsuccessfulMatches[arrayName][i] + " (" + playerName + ")</li>");
         }
+
+
     },
 
     // Gets random gif from GIPHY API
@@ -105,11 +116,14 @@ const game = {
 // Grab and display names of last players who played
 database.ref().once("value", function (snapshot) {
     
-    player1NameStored = snapshot.val().currentUsers.player1;
-    player2NameStored = snapshot.val().currentUsers.player2;
+    player1Name = snapshot.val().currentUsers.player1;
+    player2Name = snapshot.val().currentUsers.player2;
 
-    $("#name1").text(player1NameStored)
-    $("#name2").text(player2NameStored)
+    unsuccessfulMatches.player1Name = player1Name;
+    unsuccessfulMatches.player2Name = player2Name;
+
+    $("#name1").text(player1Name)
+    $("#name2").text(player2Name)
 
 })
 
@@ -117,8 +131,8 @@ database.ref().once("value", function (snapshot) {
 
     // Answer submission listeners
     $("#player-1-answer").on("click", function () {
-        let answer = $("#answer1").val();
-        console.log(answer)
+        let answer = $("#answer1").val().trim();
+        player1WrongGuess = answer;
 
         // In case the form is left empty, don't ping database
         if (answer === "") {
@@ -150,8 +164,14 @@ database.ref().once("value", function (snapshot) {
                                 game.increaseScore();
                             } else {
                                 alert("the other player guessed " + playerTwoAnswer + " instead");
-                                unsuccessfulMatches.push(answer);
-                                game.updateUnsuccessfulMatches();
+                                
+                                // Display this player's wrong answer; then, the other's 
+                                unsuccessfulMatches.player1Guesses.push(answer);
+                                game.updateUnsuccessfulMatches("player1Guesses", player1Name);
+
+                                unsuccessfulMatches.player2Guesses.push(player2WrongGuess);
+                                game.updateUnsuccessfulMatches("player2Guesses", player2Name);
+
                                 game.decrementLives();
                             }
                         }
@@ -160,8 +180,8 @@ database.ref().once("value", function (snapshot) {
     })
 
     $("#player-2-answer").on("click", function () {
-        event.preventDefault();
-        let answer = $("#answer2").val();
+        let answer = $("#answer2").val().trim();
+        player2WrongGuess = answer;
 
         // In case the form is left empty, don't ping database
         if (answer === "") {
@@ -188,11 +208,18 @@ database.ref().once("value", function (snapshot) {
                         else {
                             if (answer === playerOneAnswer) {
                                 alert("it's a match! you both guessed " + answer + "!");
-                                $("#successful-matches ul").append("<li>" + answer + "</li>");
+                                successfulMatches.push(answer);
+                                game.updateSuccessfulMatches();
                                 game.increaseScore();
                             } else {
                                 alert("the other player guessed " + playerOneAnswer + " instead");
-                                $("#unsuccessful-matches ul").append("<li>" + answer + "</li>");
+                                // Display this player's wrong answer; then, the other's 
+                                unsuccessfulMatches.player2Guesses.push(answer);
+                                game.updateUnsuccessfulMatches("player2Guesses", player2Name);
+
+                                unsuccessfulMatches.player1Guesses.push(player1WrongGuess);
+                                game.updateUnsuccessfulMatches("player1Guesses", player1Name);
+                                
                                 game.decrementLives();
                             }
                         }
@@ -204,19 +231,23 @@ database.ref().once("value", function (snapshot) {
     // Name change listeners
     $("#name-set1").on("click", function () {
         event.preventDefault();
-        newNamePlayer1 = $("#nameChoice1").val();
+        newNamePlayer1 = $("#nameChoice1").val().trim();
         database.ref().child("currentUsers").update(
             {player1: newNamePlayer1}, 
         );
+        unsuccessfulMatches.player1Name = player1Name;
+        unsuccessfulMatches.player2Name = player2Name;
         game.updatePlayerName("#name1", newNamePlayer1);
     })
 
     $("#name-set2").on("click", function () {
         event.preventDefault();
-        newNamePlayer2 = $("#nameChoice2").val();
+        newNamePlayer2 = $("#nameChoice2").val().trim();
         database.ref().child("currentUsers").update(
             {player2: newNamePlayer2}, 
         );
+        unsuccessfulMatches.player1Name = player1Name;
+        unsuccessfulMatches.player2Name = player2Name;
         game.updatePlayerName("#name2", newNamePlayer2);
     })
 
