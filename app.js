@@ -129,8 +129,8 @@ database.ref().once("value", function (snapshot) {
     unsuccessfulMatches.player1Name = player1Name;
     unsuccessfulMatches.player2Name = player2Name;
 
-    $("#name1").text(player1Name)
-    $("#name2").text(player2Name)
+    $("#name-1").text(player1Name)
+    $("#name-2").text(player2Name)
 
 })
 
@@ -138,14 +138,32 @@ database.ref().once("value", function (snapshot) {
 
     // New gif url listener
     database.ref().on("child_changed", function(snapshot) {
+        // If the gif url returned from firebase is the same as the locally stored one, ignore it
         if (localGifUrl === snapshot.val().currentGifURL) {
             return;
-        } else {
+        } 
+        // Otherwise, update it
+        else {
             localGifUrl = snapshot.val().currentGifURL;
             game.displayNewGif();
         }
     });
 
+    // Disable other player's controls listener
+    $("#player-1-choice").on("click", function() {
+        $("#player-1-status").text("Choosing name ^^")
+
+        // Disable other player's buttons
+        $("#player-2-choice").attr("disabled", true);
+        $("#name-set-2").attr("disabled", true);
+        $("#player-2-answer").attr("disabled", true);
+        $("#name-choice-2").attr("disabled", true);
+        $("#status-prefix-2").css("background-color", "rgb(90,170,255)");
+        $("#answer-2").attr("disabled", true);
+
+
+    });
+   
     // Answer submission listeners
     $("#player-1-answer").on("click", function () {
         let answer = $("#answer1").val().trim().toLowerCase();
@@ -194,7 +212,7 @@ database.ref().once("value", function (snapshot) {
                         }
                     })
             }
-    })
+    });
 
     $("#player-2-answer").on("click", function () {
         let answer = $("#answer2").val().trim().toLowerCase();
@@ -242,31 +260,31 @@ database.ref().once("value", function (snapshot) {
                         }
                     })
             }
-    })
+    });
 
 
     // Name change listeners
-    $("#name-set1").on("click", function () {
+    $("#name-set-1").on("click", function () {
         event.preventDefault();
-        newNamePlayer1 = $("#nameChoice1").val().trim();
+        newNamePlayer1 = $("#name-choice-1").val().trim();
         database.ref().child("currentUsers").update(
             {player1: newNamePlayer1}, 
         );
         unsuccessfulMatches.player1Name = player1Name;
         unsuccessfulMatches.player2Name = player2Name;
-        game.updatePlayerName("#name1", newNamePlayer1);
-    })
+        game.updatePlayerName("#name-1", newNamePlayer1);
+    });
 
-    $("#name-set2").on("click", function () {
+    $("#name-set-2").on("click", function () {
         event.preventDefault();
-        newNamePlayer2 = $("#nameChoice2").val().trim();
+        newNamePlayer2 = $("#name-choice-2").val().trim();
         database.ref().child("currentUsers").update(
             {player2: newNamePlayer2}, 
         );
         unsuccessfulMatches.player1Name = player1Name;
         unsuccessfulMatches.player2Name = player2Name;
-        game.updatePlayerName("#name2", newNamePlayer2);
-    })
+        game.updatePlayerName("#name-2", newNamePlayer2);
+    });
 
     // Handle the errors
 //     }, function(errorObject) {

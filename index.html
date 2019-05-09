@@ -78,13 +78,13 @@
         
                             <div class="col-md-4">
                                 <!-- New name input, player 1 -->
-                                <button class="btn btn-primary" id="name-set1" type="submit">CHOOSE NAME</button>&nbsp;&nbsp;
-                                <input type="text" id="nameChoice1" placeholder="Player 1 Name" size="15"> 
+                                <button class="btn btn-primary" id="name-set-1" type="submit">CHOOSE NAME</button>&nbsp;&nbsp;
+                                <input type="text" id="name-choice-1" placeholder="Player 1 Name" size="15"> 
                             </div>
                             <div class="col-md-4">
                                 <!-- New name input, player 2 -->
-                                <button class="btn btn-primary" id="name-set2" type="submit">CHOOSE NAME</button>&nbsp;&nbsp;
-                                <input type="text" id="nameChoice2" placeholder="Player 2 Name" size="15"> 
+                                <button class="btn btn-primary" id="name-set-2" type="submit">CHOOSE NAME</button>&nbsp;&nbsp;
+                                <input type="text" id="name-choice-2" placeholder="Player 2 Name" size="15"> 
                             </div>
     
                         </div>
@@ -99,10 +99,10 @@
                             </div>
                             
                             <div class="col-md-4">
-                                <span class="status-prefix">PLAYER 1 STATUS:</span> &nbsp; <span id="player-1-status">Choosing name...</span>                                
+                                <span id="status-prefix-1">PLAYER 1 STATUS:</span> <span id="player-1-status">Waiting to arrive...</span>                                
                             </div>
                             <div class="col-md-4">
-                                <span class="status-prefix">PLAYER 2 STATUS:</span> &nbsp; <span id="player-2-status">Choosing name...</span>  
+                                <span id="status-prefix-2">PLAYER 2 STATUS:</span> <span id="player-2-status">Waiting to arrive...</span>  
                             </div>
                             
                         </div>
@@ -121,9 +121,6 @@
 
     <br>
 
-            
-    
-
             <!-- Current gif display -->
            
                 <div class="card text-center">
@@ -139,13 +136,12 @@
                         <div class="col-md-3">
                                 <br>
                                 <br>
-                                <br>
                                     <!-- Description input -->
                                     <div class="md-form amber-textarea active-amber-textarea text-center">
-                                        <p style="font-weight: bold">PLAYER ONE: <span id="name1"></span></p>
+                                        <p style="font-weight: bold">PLAYER ONE: <span id="name-1"></span></p>
                                         <fieldset enabled>
-                                            <textarea id="answer1" class="md-textarea form-control" rows="1"></textarea><br>
-                                            <button class="btn btn-primary" id="player-1-answer" type="submit">Submit Answer</button>
+                                            <textarea id="answer-1" class="md-textarea form-control" rows="1"></textarea><br>
+                                            <button class="btn btn-primary" id="player-1-answer" type="submit">SUBMIT ANSWER</button>
                                         </fieldset>
                                     </div>
                             
@@ -154,10 +150,9 @@
                         <div class="col-md-4">
                             <div class="card-body">
                                 <div class="text-center">
-                                <img src="placeholder.png" class="rounded" alt="placeholder" id="gif">
+                                <img src="placeholder.png" class="rounded" alt="placeholder" id="gif" onclick="game.getNewGif()">
                                 </div>
-                                <br>
-                                <button class="btn btn-primary" onclick="game.getNewGif();">New gif</button>
+        
                             </div>
                         </div>
 
@@ -165,14 +160,13 @@
                         <div class="col-md-3">
                             <br>
                             <br>
-                            <br> 
                             <!-- Description input -->
                             <div class="md-form amber-textarea active-amber-textarea text-center">
-                                <p style="font-weight: bold">PLAYER TWO: <span id="name2"></span></p>
+                                <p style="font-weight: bold">PLAYER TWO: <span id="name-2"></span></p>
                                 <fieldset enabled>
-                                    <textarea id="answer2" class="md-textarea form-control" rows="1"></textarea>
+                                    <textarea id="answer-2" class="md-textarea form-control" rows="1"></textarea>
                                     <br>
-                                    <button class="btn btn-primary" id="player-2-answer" type="submit">Submit Answer</button>
+                                    <button class="btn btn-primary" id="player-2-answer" type="submit">SUBMIT ANSWER</button>
                                 </fieldset>
                             </div>
                         </div>
