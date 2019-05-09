@@ -55,25 +55,8 @@
                         <!-- Nested row -->
                         <div class="row">
 
-                            <div class="col-md-4 text-left">
-                                1. Decide whether you'll be player 1 or 2.
-                            </div>
-                            <div class="col-md-4">
-                                    <button class="btn btn-primary instructions" id="player-1-choice">CHOOSE PLAYER 1</button>
-                            </div>
-                            <div class="col-md-4">
-                                    <button class="btn btn-primary instructions" id="player-2-choice">CHOOSE PLAYER 2</button>
-                            </div>
-
-                        </div>
-
-                        <br>
-
-                        <!-- Nested row -->
-                        <div class="row">
-
-                            <div class="col-md-4 text-left">
-                                2. Set your name.
+                            <div class="col-md-3 text-left">
+                                <span id="instruction-1">1. Set your name.</span>
                             </div>
         
                             <div class="col-md-4">
@@ -81,7 +64,7 @@
                                 <button class="btn btn-primary" id="name-set-1" type="submit">CHOOSE NAME</button>&nbsp;&nbsp;
                                 <input type="text" id="name-choice-1" placeholder="Player 1 Name" size="15"> 
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-5">
                                 <!-- New name input, player 2 -->
                                 <button class="btn btn-primary" id="name-set-2" type="submit">CHOOSE NAME</button>&nbsp;&nbsp;
                                 <input type="text" id="name-choice-2" placeholder="Player 2 Name" size="15"> 
@@ -94,19 +77,31 @@
                         <!-- Nested row -->
                         <div class="row">
                             
-                            <div class="col-md-4 text-left">
-                                3. Wait for another player to join.
+                            <div class="col-md-3 text-left">
+                                2. Wait for another player to join.
                             </div>
                             
                             <div class="col-md-4">
-                                <span id="status-prefix-1">PLAYER 1 STATUS:</span> <span id="player-1-status">Waiting to arrive...</span>                                
+                                <span id="status-prefix-1">PLAYER 1 STATUS:</span> <span id="player-1-status">Not connected yet</span>                                
                             </div>
-                            <div class="col-md-4">
-                                <span id="status-prefix-2">PLAYER 2 STATUS:</span> <span id="player-2-status">Waiting to arrive...</span>  
+                            <div class="col-md-5">
+                                <span id="status-prefix-2">PLAYER 2 STATUS:</span> <span id="player-2-status">Not connected yet</span>  
                             </div>
                             
                         </div>
+
+                        <br>
                         
+                        <!-- Nested row -->
+                        <div class="row">
+                    
+                            <div class="col-md-6 text-left">
+                                3. When the game begins, submit your answers below.
+                            </div>
+                            
+                            <div class="col-md-6"></div>
+                            
+                        </div>
                         
                         <div class="card-body">
                     
@@ -133,7 +128,7 @@
                     
                         <div class="col-md-1"></div>
                         <!--Player1 Input Area-->
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                                 <br>
                                 <br>
                                     <!-- Description input -->
@@ -147,7 +142,7 @@
                             
                                 </div>
 
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <div class="card-body">
                                 <div class="text-center">
                                 <img src="placeholder.png" class="rounded" alt="placeholder" id="gif" onclick="game.getNewGif()">
@@ -157,7 +152,7 @@
                         </div>
 
                         <!--Player2 Input Area-->
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <br>
                             <br>
                             <!-- Description input -->
@@ -193,6 +188,7 @@
                 <h5>Successful matches</h5>
                 <ul class="list-group text-left" id="successful-matches">
                 </ul>
+                <br>
             </div>
 
             <!-- Unsuccessful word matches -->
@@ -203,7 +199,7 @@
                 </ul>
                 <br>
             </div>
-
+            
         </div>
 
     </div>

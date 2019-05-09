@@ -25,6 +25,8 @@ let unsuccessfulMatches = [];
 let player1WrongGuess = "";
 let player2WrongGuess = "";
 let localGifUrl = "";
+let isPlayerOneSetUpLocally = false;
+let isPlayerTwoSetUpLocally = false;
 
 // Game functions
 const game = {
@@ -62,7 +64,8 @@ const game = {
                 let newUrl = response.data.fixed_height_downsampled_url;
                 localGifUrl = newUrl;
                 database.ref().update({
-                    currentGifURL: newUrl
+                    currentGifURL: newUrl,
+                    hasGifURLBeenChosenAlready: true
                 });
               });
     },
@@ -72,6 +75,78 @@ const game = {
             let newSrc = snapshot.val().currentGifURL;
             $("#gif").attr("src", newSrc);
         })
+    },
+
+    setUpPlayerOneLocally: function() {
+        // Controls can be disabled only if another set remains enabled
+        if (isPlayerOneSetUpLocally === true && isPlayerTwoSetUpLocally === false) {
+            // Disable other player's buttons locally
+            $("#player-2-choice").attr("disabled", true);
+            $("#name-set-2").attr("disabled", true);
+            $("#player-2-answer").attr("disabled", true);
+            $("#name-choice-2").attr("disabled", true);
+            $("#status-prefix-2").css("background-color", "rgb(90,170,255)");
+            $("#answer-2").attr("disabled", true);
+        }
+    },
+
+    setUpPlayerTwoLocally: function() {
+        // Controls can be disabled only if another set remains enabled
+        if (isPlayerTwoSetUpLocally === true && isPlayerOneSetUpLocally === false) {
+            // Disable other player's buttons locally
+            $("#player-1-choice").attr("disabled", true);
+            $("#name-set-1").attr("disabled", true);
+            $("#player-1-answer").attr("disabled", true);
+            $("#name-choice-1").attr("disabled", true);
+            $("#status-prefix-1").css("background-color", "rgb(90,170,255)");
+            $("#answer-1").attr("disabled", true);
+            }
+    },
+
+    readyPlayerOneInFirebase: function() {
+        // Only sets up player in firebase if the other player has NOT been set up
+        database.ref().once("value", function (snapshot) {
+            if (snapshot.val().isPlayerOneReady === false) {
+                if (isPlayerOneSetUpLocally === true) {
+                    database.ref().update({
+                        isPlayerOneReady: true
+                    })
+                };
+            }
+        })
+        
+    },
+
+    readyPlayerTwoInFirebase: function() {
+        // Only sets up player in firebase if the other player has NOT been set up
+        database.ref().once("value", function (snapshot) {
+            if (snapshot.val().isPlayerTwoReady === false) {
+                if (isPlayerTwoSetUpLocally === true) {
+                    database.ref().update({
+                        isPlayerTwoReady: true
+                    })
+                };
+            }
+        })
+        
+    },
+
+    enableAllControls: function() {
+        // Re-enable player1's controls
+        $("#player-1-choice").attr("disabled", false);
+        $("#name-set-1").attr("disabled", false);
+        $("#player-1-answer").attr("disabled", false);
+        $("#name-choice-1").attr("disabled", false);
+        $("#status-prefix-1").css("background-color", "rgb(0,123,255)");
+        $("#answer-1").attr("disabled", false);
+
+        // Re-enable player2's controls
+        $("#player-2-choice").attr("disabled", false);
+        $("#name-set-2").attr("disabled", false);
+        $("#player-2-answer").attr("disabled", false);
+        $("#name-choice-2").attr("disabled", false);
+        $("#status-prefix-2").css("background-color", "rgb(0,123,255)");
+        $("#answer-2").attr("disabled", false);
     },
     
     // Clears current answers in firebase
@@ -114,63 +189,83 @@ const game = {
             livesRemaining = 5;
             $("#lives-remaining").text(livesRemaining);
         }
+        game.getNewGif();
     }
 }
 
-// Clears current answers on page load
-game.clearCurrentAnswers();
+// Functions to run on page load
+    $("#name-1").text("");
+    $("#name-2").text("");
+    database.ref().update({
+        isPlayerOneReady: false,
+        isPlayerTwoReady: false,
+        isGameRunning: false,
+        currentGifURL: "",
+        hasGifURLBeenChosenAlready: false,
+        });
+    database.ref().child("currentUsers").update({
+        player1: "",
+        player2: ""
+    })
 
-// Grab and display names of last players who played
-database.ref().once("value", function (snapshot) {
-    
-    player1Name = snapshot.val().currentUsers.player1;
-    player2Name = snapshot.val().currentUsers.player2;
-
-    unsuccessfulMatches.player1Name = player1Name;
-    unsuccessfulMatches.player2Name = player2Name;
-
-    $("#name-1").text(player1Name)
-    $("#name-2").text(player2Name)
-
-})
 
 // Event listeners
 
     // New gif url listener
-    database.ref().on("child_changed", function(snapshot) {
+    database.ref().on("value", function(snapshot) {
         // If the gif url returned from firebase is the same as the locally stored one, ignore it
-        if (localGifUrl === snapshot.val().currentGifURL) {
-            return;
-        } 
-        // Otherwise, update it
-        else {
+        // if (localGifUrl === snapshot.val().currentGifURL) {
+        //     return;
+        // } 
+        // Only change gif url if it's been newly chosen for the current round
+        if (snapshot.val().hasGifURLBeenChosenAlready === true) {
             localGifUrl = snapshot.val().currentGifURL;
             game.displayNewGif();
         }
     });
 
-    // Disable other player's controls listener
-    $("#player-1-choice").on("click", function() {
-        $("#player-1-status").text("Choosing name ^^")
-
-        // Disable other player's buttons
-        $("#player-2-choice").attr("disabled", true);
-        $("#name-set-2").attr("disabled", true);
-        $("#player-2-answer").attr("disabled", true);
-        $("#name-choice-2").attr("disabled", true);
-        $("#status-prefix-2").css("background-color", "rgb(90,170,255)");
-        $("#answer-2").attr("disabled", true);
-
-
+    // Disable other player's controls remotely listener. When firebase updates, check if other player is ready
+    database.ref().on("value", function(snapshot) {
+        if (snapshot.val().isPlayerOneReady === true) {
+            // If the other player picked player1, player2 is picked automatically
+            // Update player status
+            $("#player-1-status").text("Connected & ready")
+            isPlayerTwoSetUpLocally = true;
+            game.setUpPlayerTwoLocally();
+            game.readyPlayerTwoInFirebase();
+        } else if (snapshot.val().isPlayerTwoReady === true) { 
+            // Update player status
+            $("#player-2-status").text("Connected & ready")
+            isPlayerOneSetUpLocally = true;
+            game.setUpPlayerOneLocally();
+            game.readyPlayerOneInFirebase();
+        } else {
+            return;
+        }
     });
    
+    // Listen for one or both players being ready, then start the game
+    database.ref().on("value", function(snapshot) {
+        if (snapshot.val().isGameRunning === false && (snapshot.val().currentUsers.player1 !="" && snapshot.val().currentUsers.player2 != "")){
+            database.ref().update({
+                isGameRunning: true
+            })
+            console.log("start first round")
+            game.nextRound();
+         }
+    });
+
     // Answer submission listeners
     $("#player-1-answer").on("click", function () {
-        let answer = $("#answer1").val().trim().toLowerCase();
+        let answer = $("#answer-1").val().trim().toLowerCase();
         player1WrongGuess = answer;
 
+        // In case the player hasn't chosen a name, don't ping database
+        if (player1Name === "") {
+            alert("Choose your name to connect online first!");
+        }
         // In case the form is left empty, don't ping database
-        if (answer === "") {
+        else if (answer === "") {
             alert("Type an answer before submitting!")
         } 
             // Otherwise, ping firebase 
@@ -215,11 +310,16 @@ database.ref().once("value", function (snapshot) {
     });
 
     $("#player-2-answer").on("click", function () {
-        let answer = $("#answer2").val().trim().toLowerCase();
+        let answer = $("#answer-2").val().trim().toLowerCase();
         player2WrongGuess = answer;
 
+        // In case the player hasn't chosen a name, don't ping database
+        console.log(player2Name)
+        if (player2Name === "") {
+            alert("Choose your name to connect online first!");
+        }
         // In case the form is left empty, don't ping database
-        if (answer === "") {
+        else if (answer === "") {
             alert("Type an answer before submitting!")
         } 
             // Otherwise, ping firebase 
@@ -263,28 +363,47 @@ database.ref().once("value", function (snapshot) {
     });
 
 
-    // Name change listeners
+    // Local name change listeners
     $("#name-set-1").on("click", function () {
-        event.preventDefault();
         newNamePlayer1 = $("#name-choice-1").val().trim();
+        player1Name = newNamePlayer1;
         database.ref().child("currentUsers").update(
             {player1: newNamePlayer1}, 
         );
-        unsuccessfulMatches.player1Name = player1Name;
-        unsuccessfulMatches.player2Name = player2Name;
+        $("#player-1-status").text("Connected & ready");
         game.updatePlayerName("#name-1", newNamePlayer1);
+        isPlayerOneSetUpLocally = true;
+        game.setUpPlayerOneLocally();
+        game.readyPlayerOneInFirebase();
     });
 
     $("#name-set-2").on("click", function () {
-        event.preventDefault();
         newNamePlayer2 = $("#name-choice-2").val().trim();
+        player2Name = newNamePlayer2;
         database.ref().child("currentUsers").update(
             {player2: newNamePlayer2}, 
         );
-        unsuccessfulMatches.player1Name = player1Name;
-        unsuccessfulMatches.player2Name = player2Name;
+        $("#player-2-status").text("Connected & ready");
         game.updatePlayerName("#name-2", newNamePlayer2);
+        isPlayerTwoSetUpLocally = true;
+        game.setUpPlayerTwoLocally();
+        game.readyPlayerTwoInFirebase();
+
     });
+
+    // Remote name change listener. Lets you know when the other player has joined
+    // For some reason .on("child_changed") doesn't grab the snapshot...
+    database.ref().on("value", function(snapshot) {
+       // Only updates if the other player has updated their status in firebase
+       if (snapshot.val().isPlayerOneReady === true) {
+           newNamePlayer1 = snapshot.val().currentUsers.player1;
+           game.updatePlayerName("#name-1", newNamePlayer1);
+       }  
+       if (snapshot.val().isPlayerTwoReady === true) {
+            newNamePlayer2 = snapshot.val().currentUsers.player2;
+            game.updatePlayerName("#name-2", newNamePlayer2);
+       }
+    })
 
     // Handle the errors
 //     }, function(errorObject) {
