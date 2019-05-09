@@ -55,7 +55,7 @@
                         <!-- Nested row -->
                         <div class="row">
 
-                            <div class="col-md-4">
+                            <div class="col-md-4 text-left">
                                 1. Decide whether you'll be player 1 or 2.
                             </div>
                             <div class="col-md-4">
@@ -72,7 +72,7 @@
                         <!-- Nested row -->
                         <div class="row">
 
-                            <div class="col-md-4">
+                            <div class="col-md-4 text-left">
                                 2. Set your name.
                             </div>
         
@@ -94,7 +94,7 @@
                         <!-- Nested row -->
                         <div class="row">
                             
-                            <div class="col-md-4">
+                            <div class="col-md-4 text-left">
                                 3. Wait for another player to join.
                             </div>
                             
@@ -132,7 +132,7 @@
                 <br>                
                     <!-- Description input -->
                     <div class="md-form amber-textarea active-amber-textarea text-center">
-                        <p>PLAYER ONE: <span id="name1"></span></p>
+                        <p style="font-weight: bold">PLAYER ONE: <span id="name1"></span></p>
                         <fieldset enabled>
                             <textarea id="answer1" class="md-textarea form-control" rows="1"></textarea><br>
                             <button class="btn btn-primary" id="player-1-answer" type="submit">Submit Answer</button>
@@ -169,7 +169,7 @@
                 <br>  
                 <!-- Description input -->
                 <div class="md-form amber-textarea active-amber-textarea text-center">
-                    <p>PLAYER TWO: <span id="name2"></span></p>
+                    <p style="font-weight: bold">PLAYER TWO: <span id="name2"></span></p>
                     <fieldset enabled>
                         <textarea id="answer2" class="md-textarea form-control" rows="1"></textarea>
                         <br>
@@ -188,17 +188,20 @@
         <div class="row"> 
             
             <!-- Successful word matches -->
-            <div class="col-md-6 parent-list">
+            <div class="col-md-6 text-center">
+                <p></p>
                 <h5>Successful matches</h5>
-                <ul class="list-group" id="successful-matches">
+                <ul class="list-group text-left" id="successful-matches">
                 </ul>
             </div>
 
             <!-- Unsuccessful word matches -->
-            <div class="col-md-6 parent-list">
+            <div class="col-md-6 text-center">
+                <p></p>
                 <h5>Unsuccessful matches</h5>
-                <ul class="list-group" id="unsuccessful-matches">
+                <ul class="list-group text-left" id="unsuccessful-matches">
                 </ul>
+                <br>
             </div>
 
         </div>

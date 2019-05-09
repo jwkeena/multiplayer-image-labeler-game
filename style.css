@@ -1,28 +1,26 @@
-.parent-list {
-    text-align: center;
-}
-
-/* Centers the bullet point in the lists */
-.parent-list > ul {
-    display: inline-block;
-}
-
 .instructions {
-    padding: 6px 80px 6px 80px;
+    padding: 7px 80px 7px 80px;
 }
 
 #rules {
     font-size: 15px;
+    position: relative;
+    right: 15px;
 }
 
 .status-prefix {
-    background-color: dodgerblue;
+    background-color: rgb(0,123,255);
     color: white;
     border-radius: 5px;
-    padding: 6px 13px 6px 13px;
+    padding: 7px 13px 7px 13px;
 }
 
 #player-1-status, #player-2-status {
     color: mediumorchid;
     font-weight: bold;
+}
+
+.text-left {
+    position: relative;
+    left: 45px;
 }
