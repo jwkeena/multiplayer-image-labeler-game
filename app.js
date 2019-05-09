@@ -24,6 +24,7 @@ let successfulMatches = [];
 let unsuccessfulMatches = [];
 let player1WrongGuess = "";
 let player2WrongGuess = "";
+let localGifUrl = "";
 
 // Game functions
 const game = {
@@ -59,11 +60,11 @@ const game = {
             method: "GET"})
             .then(function (response) {
                 let newUrl = response.data.fixed_height_downsampled_url;
+                localGifUrl = newUrl;
                 database.ref().update({
                     currentGifURL: newUrl
                 });
-                game.displayNewGif();
-            });
+              });
     },
 
     displayNewGif: function() {
@@ -134,6 +135,16 @@ database.ref().once("value", function (snapshot) {
 })
 
 // Event listeners
+
+    // New gif url listener
+    database.ref().on("child_changed", function(snapshot) {
+        if (localGifUrl === snapshot.val().currentGifURL) {
+            return;
+        } else {
+            localGifUrl = snapshot.val().currentGifURL;
+            game.displayNewGif();
+        }
+    });
 
     // Answer submission listeners
     $("#player-1-answer").on("click", function () {
