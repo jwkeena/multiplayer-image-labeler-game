@@ -160,10 +160,7 @@ const game = {
     // Update score
     increaseScore: function() {
         database.ref().child("currentScore").transaction(function(currentScore) {
-            if (currentScore) {
-                currentScore = currentScore + 1;
-            }
-            return (currentScore || 0) + 1;
+                return (currentScore || 0) + 1;
         })
         game.clearCurrentAnswers();
     },
@@ -171,23 +168,20 @@ const game = {
     //Update lives remaining
     decrementLives: function() {
         database.ref().child("currentLives").transaction(function(currentLives) {
-            if (currentLives) {
-                currentLives = currentLives + 1;
-            }
-            return (currentLives || 0) + 1;
+            return (currentLives || 0) - 1;
         })
         game.clearCurrentAnswers();
     },
 
-    // Reset round and lives
+    // Increment round, reset lives, get new gif
     nextRound: function() {
-        console.log("running game.nextRound")
         database.ref().child("currentRound").transaction(function(currentRound) {
-            if (currentRound) {
-                currentRound = currentRound + 1;
-            }
             return (currentRound || 0) + 1;
         });
+
+        // database.ref().child("currentLives").update({
+        //     currentLives: 5
+        // });
 
         game.getNewGif();
     }
@@ -210,6 +204,10 @@ const game = {
         player1: "",
         player2: ""
     })
+    database.ref().child("currentAnswers").update({
+        playerOneAnswer: "",
+        playerTwoAnswer: ""
+    })
 
 
 // Event listeners
@@ -221,7 +219,10 @@ const game = {
             localGifUrl = snapshot.val().currentGifURL;
             game.displayNewGif();
         }
-        
+
+        // Update isGameRunningLocally variable
+        isGameRunningLocally = snapshot.val().isGameRunning;
+
         // Update score
         score = snapshot.val().currentScore;
         $("#score").text(score);
@@ -231,7 +232,7 @@ const game = {
         $("#current-round").text(round);
 
             // Check if the game is over
-            if (currentRound > 10) {
+            if (round > 10) {
                 console.log("game is over")
                 //game.endGame();
             }
@@ -272,13 +273,15 @@ const game = {
     // Listen for one or both players being ready, then start the game
     database.ref().on("value", function(snapshot) {
         if (snapshot.val().isGameRunning === false && (snapshot.val().currentUsers.player1) && (snapshot.val().currentUsers.player2)){
+
             database.ref().update({
                 isGameRunning: true
-            })
+            });
+
             // Updates whichever player's status is missing
             $("#player-1-status").text("Connected & ready");
             $("#player-2-status").text("Connected & ready");
-            console.log("start next round")
+
             game.nextRound();
          }
     });
