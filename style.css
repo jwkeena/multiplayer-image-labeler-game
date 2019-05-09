@@ -6,3 +6,23 @@
 .parent-list > ul {
     display: inline-block;
 }
+
+.instructions {
+    padding: 6px 80px 6px 80px;
+}
+
+#rules {
+    font-size: 15px;
+}
+
+.status-prefix {
+    background-color: dodgerblue;
+    color: white;
+    border-radius: 5px;
+    padding: 6px 13px 6px 13px;
+}
+
+#player-1-status, #player-2-status {
+    color: mediumorchid;
+    font-weight: bold;
+}
