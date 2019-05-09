@@ -181,13 +181,13 @@ const game = {
 
     // Reset round and lives
     nextRound: function() {
-        
+        console.log("running game.nextRound")
         database.ref().child("currentRound").transaction(function(currentRound) {
             if (currentRound) {
                 currentRound = currentRound + 1;
             }
             return (currentRound || 0) + 1;
-        })
+        });
 
         game.getNewGif();
     }
@@ -203,7 +203,8 @@ const game = {
         currentGifURL: "",
         hasGifURLBeenChosenAlready: false,
         currentRound: 0,
-        currentLives: 5
+        currentLives: 5,
+        currentScore: 0
         });
     database.ref().child("currentUsers").update({
         player1: "",
@@ -241,6 +242,7 @@ const game = {
             
             // Check if all lives have been lost
             if (lives === 0) {
+                console.log("line 245")
                 game.nextRound();
             } else {
                 $("#lives-remaining").text(livesRemaining);
@@ -269,7 +271,7 @@ const game = {
    
     // Listen for one or both players being ready, then start the game
     database.ref().on("value", function(snapshot) {
-        if (snapshot.val().isGameRunning === false && (snapshot.val().currentUsers.player1 !="") && (snapshot.val().currentUsers.player2 != "")){
+        if (snapshot.val().isGameRunning === false && (snapshot.val().currentUsers.player1) && (snapshot.val().currentUsers.player2)){
             database.ref().update({
                 isGameRunning: true
             })
@@ -304,6 +306,7 @@ const game = {
                 // Then check if there's an answer from playerTwo
                 // MUST use .once method, otherwise promise resolves multiple times
                 database.ref().once("value", function (snapshot) {
+                    playerOneAnswer = snapshot.val().currentAnswers.playerOneAnswer;
                     playerTwoAnswer = snapshot.val().currentAnswers.playerTwoAnswer;
 
                     // If there's no answer yet, display waiting message
@@ -313,7 +316,7 @@ const game = {
                     } 
                         // If there is an answer, check if they match
                         else {
-                            if (answer === playerTwoAnswer) {
+                            if (playerOneAnswer === playerTwoAnswer) {
                                 alert("it's a match! you both guessed " + answer + "!");
                                 successfulMatches.push(answer);
                                 game.updateSuccessfulMatches();
@@ -358,6 +361,7 @@ const game = {
                 // MUST use .once method, otherwise promise resolves multiple times
                 database.ref().once("value", function (snapshot) {
                     playerOneAnswer = snapshot.val().currentAnswers.playerOneAnswer;
+                    playerTwoAnswer = snapshot.val().currentAnswers.playerTwoAnswer;
 
                     // If there's no answer yet, display waiting message
                     if (playerOneAnswer === "") {
@@ -366,7 +370,7 @@ const game = {
                     } 
                         // If there is an answer, check if they match
                         else {
-                            if (answer === playerOneAnswer) {
+                            if (playerTwoAnswer === playerOneAnswer) {
                                 alert("it's a match! you both guessed " + answer + "!");
                                 successfulMatches.push(answer);
                                 game.updateSuccessfulMatches();
