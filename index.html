@@ -121,65 +121,71 @@
 
     <br>
 
-        <div class="row">
             
-             <!--Player1 Input Area-->
-             <div class="col-md-3">
-                <br>
-                <br>
-                <br>
-                <br>
-                <br>                
-                    <!-- Description input -->
-                    <div class="md-form amber-textarea active-amber-textarea text-center">
-                        <p style="font-weight: bold">PLAYER ONE: <span id="name1"></span></p>
-                        <fieldset enabled>
-                            <textarea id="answer1" class="md-textarea form-control" rows="1"></textarea><br>
-                            <button class="btn btn-primary" id="player-1-answer" type="submit">Submit Answer</button>
-                        </fieldset>
-                    </div>
-            
-                </div>
+    
 
             <!-- Current gif display -->
-            <div class="col-md-6">
+           
                 <div class="card text-center">
                     <div class="card-header">
                         <h2 class>Play Field</h2>
                     </div>
-                    <div class="card-body">
-                        <div class="text-center">
-                        <img src="placeholder.png" class="rounded" alt="placeholder" id="gif">
+
+                    <!-- Nexted row -->
+                    <div class="row">
+                    
+                        <div class="col-md-1"></div>
+                        <!--Player1 Input Area-->
+                        <div class="col-md-3">
+                                <br>
+                                <br>
+                                <br>
+                                    <!-- Description input -->
+                                    <div class="md-form amber-textarea active-amber-textarea text-center">
+                                        <p style="font-weight: bold">PLAYER ONE: <span id="name1"></span></p>
+                                        <fieldset enabled>
+                                            <textarea id="answer1" class="md-textarea form-control" rows="1"></textarea><br>
+                                            <button class="btn btn-primary" id="player-1-answer" type="submit">Submit Answer</button>
+                                        </fieldset>
+                                    </div>
+                            
+                                </div>
+
+                        <div class="col-md-4">
+                            <div class="card-body">
+                                <div class="text-center">
+                                <img src="placeholder.png" class="rounded" alt="placeholder" id="gif">
+                                </div>
+                                <br>
+                                <button class="btn btn-primary" onclick="game.getNewGif();">New gif</button>
+                            </div>
                         </div>
-                        <br>
-                        <button class="btn btn-primary" onclick="game.getNewGif();">New gif</button>
+
+                        <!--Player2 Input Area-->
+                        <div class="col-md-3">
+                            <br>
+                            <br>
+                            <br> 
+                            <!-- Description input -->
+                            <div class="md-form amber-textarea active-amber-textarea text-center">
+                                <p style="font-weight: bold">PLAYER TWO: <span id="name2"></span></p>
+                                <fieldset enabled>
+                                    <textarea id="answer2" class="md-textarea form-control" rows="1"></textarea>
+                                    <br>
+                                    <button class="btn btn-primary" id="player-2-answer" type="submit">Submit Answer</button>
+                                </fieldset>
+                            </div>
+                        </div>
+                        <div class="col-md-1"></div>
+
+
                     </div>
+
+
                     <div class="card-footer text-muted">
                     Score: <span id="score">0</span> | Lives Remaining: <span id="lives-remaining">5</span> | Current round: <span id="current-round">0</span>/10 
                     </div>
                 </div>
-            </div>
-            
-            <!--Player2 Input Area-->
-            <div class="col-md-3">
-                <br>
-                <br>
-                <br>
-                <br>
-                <br>  
-                <!-- Description input -->
-                <div class="md-form amber-textarea active-amber-textarea text-center">
-                    <p style="font-weight: bold">PLAYER TWO: <span id="name2"></span></p>
-                    <fieldset enabled>
-                        <textarea id="answer2" class="md-textarea form-control" rows="1"></textarea>
-                        <br>
-                        <button class="btn btn-primary" id="player-2-answer" type="submit">Submit Answer</button>
-                    </fieldset>
-                </div>
-            </div>
-
-        </div>
-
     <br>
 
         <!--New row  -->
