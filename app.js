@@ -159,36 +159,36 @@ const game = {
 
     // Update score
     increaseScore: function() {
-        score++;
-        $("#score").text(score);
+        database.ref().child("currentScore").transaction(function(currentScore) {
+            if (currentScore) {
+                currentScore = currentScore + 1;
+            }
+            return (currentScore || 0) + 1;
+        })
         game.clearCurrentAnswers();
     },
 
     //Update lives remaining
     decrementLives: function() {
-        livesRemaining--;
-        
-        if (livesRemaining === 0) {
-            game.nextRound();
-            game.clearCurrentAnswers();
-        } else {
-            $("#lives-remaining").text(livesRemaining);
-            game.clearCurrentAnswers();
-        }
+        database.ref().child("currentLives").transaction(function(currentLives) {
+            if (currentLives) {
+                currentLives = currentLives + 1;
+            }
+            return (currentLives || 0) + 1;
+        })
+        game.clearCurrentAnswers();
     },
 
     // Reset round and lives
     nextRound: function() {
-        currentRound++;
+        
+        database.ref().child("currentRound").transaction(function(currentRound) {
+            if (currentRound) {
+                currentRound = currentRound + 1;
+            }
+            return (currentRound || 0) + 1;
+        })
 
-        // Check if the game is over
-        if (currentRound > 10) {
-            //game.endGame();
-        } else {
-            $("#current-round").text(currentRound)
-            livesRemaining = 5;
-            $("#lives-remaining").text(livesRemaining);
-        }
         game.getNewGif();
     }
 }
@@ -202,6 +202,8 @@ const game = {
         isGameRunning: false,
         currentGifURL: "",
         hasGifURLBeenChosenAlready: false,
+        currentRound: 0,
+        currentLives: 5
         });
     database.ref().child("currentUsers").update({
         player1: "",
@@ -211,17 +213,38 @@ const game = {
 
 // Event listeners
 
-    // New gif url listener
+    // New gif url, score, lives, round listener
     database.ref().on("value", function(snapshot) {
-        // If the gif url returned from firebase is the same as the locally stored one, ignore it
-        // if (localGifUrl === snapshot.val().currentGifURL) {
-        //     return;
-        // } 
         // Only change gif url if it's been newly chosen for the current round
         if (snapshot.val().hasGifURLBeenChosenAlready === true) {
             localGifUrl = snapshot.val().currentGifURL;
             game.displayNewGif();
         }
+        
+        // Update score
+        score = snapshot.val().currentScore;
+        $("#score").text(score);
+
+        // Update round number
+        round = snapshot.val().currentRound;
+        $("#current-round").text(round);
+
+            // Check if the game is over
+            if (currentRound > 10) {
+                console.log("game is over")
+                //game.endGame();
+            }
+
+        // Update lives
+        lives = snapshot.val().currentLives;
+        $("#current-lives").text(lives);
+            
+            // Check if all lives have been lost
+            if (lives === 0) {
+                game.nextRound();
+            } else {
+                $("#lives-remaining").text(livesRemaining);
+            }
     });
 
     // Disable other player's controls remotely listener. When firebase updates, check if other player is ready
@@ -246,11 +269,14 @@ const game = {
    
     // Listen for one or both players being ready, then start the game
     database.ref().on("value", function(snapshot) {
-        if (snapshot.val().isGameRunning === false && (snapshot.val().currentUsers.player1 !="" && snapshot.val().currentUsers.player2 != "")){
+        if (snapshot.val().isGameRunning === false && (snapshot.val().currentUsers.player1 !="") && (snapshot.val().currentUsers.player2 != "")){
             database.ref().update({
                 isGameRunning: true
             })
-            console.log("start first round")
+            // Updates whichever player's status is missing
+            $("#player-1-status").text("Connected & ready");
+            $("#player-2-status").text("Connected & ready");
+            console.log("start next round")
             game.nextRound();
          }
     });
@@ -314,7 +340,6 @@ const game = {
         player2WrongGuess = answer;
 
         // In case the player hasn't chosen a name, don't ping database
-        console.log(player2Name)
         if (player2Name === "") {
             alert("Choose your name to connect online first!");
         }
