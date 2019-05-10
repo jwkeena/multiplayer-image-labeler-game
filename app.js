@@ -41,14 +41,14 @@ const game = {
             {answer: answer});
     },
 
-    // Deletes display to prevent duplicates and rewrites all items in array to add the newest one
-    updateUnsuccessfulMatches: function(player1Name, answer, player2Name, player2WrongGuess) {
-        database.ref().child("matches/unsuccessful").push(
-            {player1Name,
-             answer },
-            {player2Name,
-             player2WrongGuess});
-    },
+    // Pushes both wrong answers to separate branches, so they can be identified later
+    updateUnsuccessfulMatches: function(answer, wrongGuess) {
+        database.ref().child("matches/unsuccessful/player1").push(
+            {answer: answer});
+            
+        database.ref().child("matches/unsuccessful/player2").push(
+            {wrongGuess: wrongGuess});
+       },
 
     // Gets random gif from GIPHY API
     getNewGif: function() {
@@ -207,16 +207,22 @@ const game = {
         playerOneAnswer: "",
         playerTwoAnswer: ""
     })
+    database.ref().child("matches").set({
+
+    })
 
 // Event listeners
 
-    // New gif url, score, lives, and round listener
+    // New name, gif url, score, lives, and round listener
     database.ref().on("value", function(snapshot) {
         // Only change gif url if it's been newly chosen for the current round
         if (snapshot.val().hasGifURLBeenChosenAlready === true) {
             localGifUrl = snapshot.val().currentGifURL;
             game.displayNewGif();
         }
+
+        player1Name = snapshot.val().currentUsers.player1;
+        player2Name = snapshot.val().currentUsers.player2;
 
         // Update isGameRunningLocally variable
         isGameRunningLocally = snapshot.val().isGameRunning;
@@ -253,6 +259,20 @@ const game = {
         correctAnswer = snapshot.val().answer;
         let newListItem = $("<li>" + correctAnswer + "</li>");
         $("#successful-matches").append(newListItem);
+    });
+
+    // Incorrect answer listener, player1
+    database.ref().child("matches/unsuccessful/player1").on("child_added", function (snapshot) {
+        incorrectAnswer = snapshot.val().answer;
+        let newListItem = $("<li>" + incorrectAnswer + " (" + player1Name + ")</li>");
+        $("#unsuccessful-matches").append(newListItem);
+    });
+
+    // Incorrect answer listener, player2
+    database.ref().child("matches/unsuccessful/player2").on("child_added", function (snapshot) {
+        incorrectAnswer = snapshot.val().wrongGuess;
+        let newListItem = $("<li>" + incorrectAnswer + " (" + player2Name + ")</li>");
+        $("#unsuccessful-matches").append(newListItem);
     });
 
     // Disable other player's controls remotely listener. When firebase updates, check if other player is ready
@@ -332,7 +352,7 @@ const game = {
                                 alert("the other player guessed " + playerTwoAnswer + " instead");
                                 
                                 // Display this player's wrong answer; then, the other's 
-                                game.updateUnsuccessfulMatches(player1Name, answer, player2Name, player2WrongGuess);
+                                game.updateUnsuccessfulMatches(answer, playerTwoAnswer);
                                 game.decrementLives();
                             }
                         }
@@ -379,11 +399,7 @@ const game = {
                             } else {
                                 alert("the other player guessed " + playerOneAnswer + " instead");
                                 // Display this player's wrong answer; then, the other's 
-                                unsuccessfulMatches.push(answer);
-                                unsuccessfulMatches.push(player2Name);
-                                unsuccessfulMatches.push(player1WrongGuess);
-                                unsuccessfulMatches.push(player1Name);
-                                game.updateUnsuccessfulMatches();
+                                game.updateUnsuccessfulMatches(answer, playerOneAnswer);
                                 
                                 game.decrementLives();
                             }
