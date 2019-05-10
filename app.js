@@ -159,29 +159,33 @@ const game = {
 
     // Update score
     increaseScore: function() {
-        database.ref().child("currentScore").transaction(function(currentScore) {
-                return (currentScore || 0) + 1;
-        })
+        // This method works, but .transaction doesn't
+        score++
+        database.ref().update({
+            currentScore: score
+        });
         game.clearCurrentAnswers();
     },
 
     //Update lives remaining
     decrementLives: function() {
-        database.ref().child("currentLives").transaction(function(currentLives) {
-            return (currentLives || 0) - 1;
+        livesRemaining--
+        database.ref().update({
+            currentLives: livesRemaining
         })
         game.clearCurrentAnswers();
     },
 
     // Increment round, reset lives, get new gif
     nextRound: function() {
-        database.ref().child("currentRound").transaction(function(currentRound) {
-            return (currentRound || 0) + 1;
-        });
+        currentRound++
+        database.ref().update({
+            currentRound: currentRound
+        })
 
-        // database.ref().child("currentLives").update({
-        //     currentLives: 5
-        // });
+        database.ref().child("currentLives").update({
+            currentLives: 5
+        });
 
         game.getNewGif();
     }
