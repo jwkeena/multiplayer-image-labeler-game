@@ -28,7 +28,6 @@ let player2WrongGuess = "";
 let localGifUrl = "";
 let isPlayerOneSetUpLocally = false;
 let isPlayerTwoSetUpLocally = false;
-let isRoundSwitching = false;
 let hasPlayerSubmitted = false;
 
 // Game functions
@@ -195,8 +194,6 @@ const game = {
         });
         setTimeout(game.clearCurrentAnswers(), 2000);
 
-        // Resets bottleneck for round switching, so that an infinite loop isn't caused
-        isRoundSwitching = false;
     },
 
     //Update lives remaining
@@ -257,8 +254,9 @@ const game = {
 
 // Event listeners
 
-    // New name, gif url, score, lives, and round listener
+    // New name, gif url, score, and round listener
     database.ref().on("value", function(snapshot) {
+        console.log("checking snapshot")
         // Only change gif url if it's been newly chosen for the current round
         if (snapshot.val().hasGifURLBeenChosenAlready === true) {
             localGifUrl = snapshot.val().currentGifURL;
@@ -278,24 +276,20 @@ const game = {
         // Update isGameRunningLocally variable
         isGameRunningLocally = snapshot.val().isGameRunning;
 
-        // Update score and display matching word
-        if (score !== snapshot.val().currentScore) {
-            score = snapshot.val().currentScore;
-            $("#score").text(score);
-        }
+        // Update score. Don't wrap this in an if block; it won't update fast enough
+        score = snapshot.val().currentScore;
+        $("#score").text(score);
         
         // Update round number
-        if (currentRound !== snapshot.val().currentRound) {
-            currentRound = snapshot.val().currentRound;
-            $("#current-round").text(currentRound);
-            if (currentRound > 5) {
-                game.liveUpdate("Game Over")
-                //game.endGame();
-            } else if (currentRound === 0) {
-                return;
-            } else {
-                game.liveUpdate("Let round " + currentRound + " begin!");
-            }
+        currentRound = snapshot.val().currentRound;
+        $("#current-round").text(currentRound);
+        if (currentRound > 5) {
+            game.liveUpdate("Game Over")
+            //game.endGame();
+        } else if (currentRound === 0) {
+            console.log("current round is 0");
+        } else {
+            game.liveUpdate("Let round " + currentRound + " begin!");
         };
 
         // Update lives
@@ -304,8 +298,7 @@ const game = {
             $("#current-lives").text(livesRemaining);
 
             // Check if all lives have been lost
-            if (livesRemaining === 0 && isRoundSwitching === false) {
-                isRoundSwitching = true;
+            if (livesRemaining === 0) {
                 game.nextRound();
             } else {
                 $("#lives-remaining").text(livesRemaining);
@@ -316,7 +309,6 @@ const game = {
 
     // Correct answer listener
     database.ref().child("matches/successful").on("child_added", function (snapshot) {
-        game.increaseScore();
         hasPlayerSubmitted = false;
 
         correctAnswer = snapshot.val().answer;
@@ -328,7 +320,6 @@ const game = {
     // Incorrect answer listener, player1 node
     database.ref().child("matches/unsuccessful/player1").on("child_added", function (snapshot) {
         // Only need to decrement lives once, so I'll put it here and not in the next listener
-        game.decrementLives();
         hasPlayerSubmitted = false;
 
         incorrectAnswer = snapshot.val().answer;
@@ -378,7 +369,7 @@ const game = {
             game.setUpPlayerOneLocally();
             game.readyPlayerOneInFirebase();
         } else {
-            return;
+            // Do nothing
         }
     });
    
@@ -437,6 +428,7 @@ const game = {
                         else {
                             if (playerOneAnswer === playerTwoAnswer) {
                                 game.updateSuccessfulMatches(answer);
+                                game.increaseScore();
                             } else {
                                 // Display this player's wrong answer; then, the other's 
                                 game.updateUnsuccessfulMatches(answer, playerTwoAnswer);
@@ -486,10 +478,12 @@ const game = {
                             if (playerTwoAnswer === playerOneAnswer) {
                                 game.liveUpdate("it's a match! you both guessed " + answer + "!");
                                 game.updateSuccessfulMatches(answer);
+                                game.increaseScore();
                             } else {
                                 game.liveUpdate("the other player guessed " + playerOneAnswer + " instead");
                                 // Display this player's wrong answer; then, the other's 
                                 game.updateUnsuccessfulMatches(answer, playerOneAnswer);
+                                game.decrementLives();
                             }
                         }
                     })
