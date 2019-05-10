@@ -36,23 +36,18 @@ const game = {
         $(spanID).text(newName);
     },
 
-    // Deletes display to prevent duplicates and rewrites all items in array to add the newest one
-    updateSuccessfulMatches: function() {
-        $("#successful-matches").empty();
-        for (i=0; i < successfulMatches.length; i++) {
-            $("#successful-matches").append("<li>" + successfulMatches[i] + "</li>");
-        }
+    updateSuccessfulMatches: function(answer) {
+        database.ref().child("matches/successful").push(
+            {answer: answer});
     },
 
     // Deletes display to prevent duplicates and rewrites all items in array to add the newest one
-    updateUnsuccessfulMatches: function() {
-        $("#unsuccessful-matches").empty();
-
-        // Increment by two, since every other item in the array is the player's name who made the guess
-        for (i=0; i < unsuccessfulMatches.length; i += 2) {
-            j = i + 1;
-            $("#unsuccessful-matches").append("<li>" + unsuccessfulMatches[i] + " (" + unsuccessfulMatches[j] + ")</li>");
-        }
+    updateUnsuccessfulMatches: function(player1Name, answer, player2Name, player2WrongGuess) {
+        database.ref().child("matches/unsuccessful").push(
+            {player1Name,
+             answer },
+            {player2Name,
+             player2WrongGuess});
     },
 
     // Gets random gif from GIPHY API
@@ -202,7 +197,7 @@ const game = {
         hasGifURLBeenChosenAlready: false,
         currentRound: 0,
         currentLives: 5,
-        currentScore: 0
+        currentScore: 0,
         });
     database.ref().child("currentUsers").update({
         player1: "",
@@ -213,10 +208,9 @@ const game = {
         playerTwoAnswer: ""
     })
 
-
 // Event listeners
 
-    // New gif url, score, lives, round listener
+    // New gif url, score, lives, and round listener
     database.ref().on("value", function(snapshot) {
         // Only change gif url if it's been newly chosen for the current round
         if (snapshot.val().hasGifURLBeenChosenAlready === true) {
@@ -251,7 +245,14 @@ const game = {
                 game.nextRound();
             } else {
                 $("#lives-remaining").text(livesRemaining);
-            }
+            } 
+    });
+
+    // Correct answer listener
+    database.ref().child("matches/successful").on("child_added", function (snapshot) {
+        correctAnswer = snapshot.val().answer;
+        let newListItem = $("<li>" + correctAnswer + "</li>");
+        $("#successful-matches").append(newListItem);
     });
 
     // Disable other player's controls remotely listener. When firebase updates, check if other player is ready
@@ -325,19 +326,13 @@ const game = {
                         else {
                             if (playerOneAnswer === playerTwoAnswer) {
                                 alert("it's a match! you both guessed " + answer + "!");
-                                successfulMatches.push(answer);
-                                game.updateSuccessfulMatches();
+                                game.updateSuccessfulMatches(answer);
                                 game.increaseScore();
                             } else {
                                 alert("the other player guessed " + playerTwoAnswer + " instead");
                                 
                                 // Display this player's wrong answer; then, the other's 
-                                unsuccessfulMatches.push(answer);
-                                unsuccessfulMatches.push(player1Name);
-                                unsuccessfulMatches.push(player2WrongGuess);
-                                unsuccessfulMatches.push(player2Name)
-                                game.updateUnsuccessfulMatches();
-
+                                game.updateUnsuccessfulMatches(player1Name, answer, player2Name, player2WrongGuess);
                                 game.decrementLives();
                             }
                         }
@@ -379,8 +374,7 @@ const game = {
                         else {
                             if (playerTwoAnswer === playerOneAnswer) {
                                 alert("it's a match! you both guessed " + answer + "!");
-                                successfulMatches.push(answer);
-                                game.updateSuccessfulMatches();
+                                game.updateSuccessfulMatches(answer);
                                 game.increaseScore();
                             } else {
                                 alert("the other player guessed " + playerOneAnswer + " instead");
