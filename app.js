@@ -46,6 +46,25 @@ const game = {
         }, 5500);
     },
     
+    pressEnterToSubmit: function (event, element) {
+        if (event && event.keyCode === 13) {
+            switch (element) {
+                case 1: 
+                    document.getElementById("name-set-1").click();
+                    break;
+                case 2: 
+                    document.getElementById("name-set-2").click();
+                    break;
+                case 3:
+                    document.getElementById("player-1-answer").click();
+                    break;
+                case 4: 
+                    document.getElementById("player-2-answer").click();
+                    break;
+            } 
+        }
+    },
+
     // Displays player's name on screen
     updatePlayerName: function (spanID, newName) {
         $(spanID).text(newName);

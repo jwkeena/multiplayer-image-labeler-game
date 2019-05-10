@@ -62,12 +62,12 @@
                             <div class="col-md-4">
                                 <!-- New name input, player 1 -->
                                 <button class="btn btn-primary" id="name-set-1" type="submit">CHOOSE NAME</button>&nbsp;&nbsp;
-                                <input type="text" id="name-choice-1" placeholder="Player 1 Name" size="15"> 
+                                <input onkeyup="return game.pressEnterToSubmit(event, 1)" type="text" id="name-choice-1" placeholder="Player 1 Name" size="15"> 
                             </div>
                             <div class="col-md-5">
                                 <!-- New name input, player 2 -->
                                 <button class="btn btn-primary" id="name-set-2" type="submit">CHOOSE NAME</button>&nbsp;&nbsp;
-                                <input type="text" id="name-choice-2" placeholder="Player 2 Name" size="15"> 
+                                <input onkeyup="return game.pressEnterToSubmit(event, 2)" type="text" id="name-choice-2" placeholder="Player 2 Name" size="15"> 
                             </div>
     
                         </div>
@@ -138,7 +138,7 @@
                                     <div class="md-form amber-textarea active-amber-textarea text-center">
                                         <p style="font-weight: bold">PLAYER ONE: <span id="name-1"></span></p>
                                         <fieldset enabled>
-                                            <textarea id="answer-1" class="md-textarea form-control" rows="1"></textarea><br>
+                                            <textarea onkeyup="return game.pressEnterToSubmit(event, 3)" id="answer-1" class="md-textarea form-control" rows="1"></textarea><br>
                                             <button class="btn btn-primary" id="player-1-answer" type="submit">SUBMIT ANSWER</button>
                                         </fieldset>
                                     </div>
@@ -162,7 +162,7 @@
                             <div class="md-form amber-textarea active-amber-textarea text-center">
                                 <p style="font-weight: bold">PLAYER TWO: <span id="name-2"></span></p>
                                 <fieldset enabled>
-                                    <textarea id="answer-2" class="md-textarea form-control" rows="1"></textarea>
+                                    <textarea onkeyup="return game.pressEnterToSubmit(event, 4)" id="answer-2" class="md-textarea form-control" rows="1"></textarea>
                                     <br>
                                     <button class="btn btn-primary" id="player-2-answer" type="submit">SUBMIT ANSWER</button>
                                 </fieldset>
