@@ -42,8 +42,8 @@
                         <span id="rules">
                             Your goal is to describe the image using the exact same words that your online partner has also submitted.
                             Each exactly matching word or phrase earns a point; each incorrect guess loses a life.
-                            Five lives are given per round.
-                            At the end of ten rounds, the total score is tallied. Try to get a high score!
+                            Three lives are given per round.
+                            At the end of five rounds, the total score is tallied. Try to get a high score!
                         </span>
                     </div>
 
@@ -121,6 +121,9 @@
                 <div class="card text-center">
                     <div class="card-header">
                         <h2 class>Play Field</h2>
+                            <div class="text-muted">
+                                Score: <span id="score">0</span> | Lives Remaining: <span id="lives-remaining">3</span> | Current round: <span id="current-round">0</span>/5 
+                            </div>
                     </div>
 
                     <!-- Nexted row -->
@@ -170,7 +173,8 @@
                     </div>
 
                     <div class="card-footer text-muted">
-                    Score: <span id="score">0</span> | Lives Remaining: <span id="lives-remaining">5</span> | Current round: <span id="current-round">0</span>/10 
+                        <span id="live-update"></span>   
+                        <br>                 
                     </div>
                 </div>
     <br>

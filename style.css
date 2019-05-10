@@ -35,3 +35,41 @@
     position: relative;
     top: 15px;
 }
+
+
+.live-update-in {
+  animation: 3s slide-left;
+  width:100%;
+  overflow:hidden;
+}
+
+.live-update-out {
+    animation: 3s slide-right;
+    width:100%;
+    overflow:hidden;
+}
+
+/* Adapted from https://www.html.am/html-codes/marquees/css-slide-in-text.cfm */
+@keyframes slide-left {
+  from {
+    margin-right: -100%;
+    width: 300%; 
+  }
+
+  to {
+    margin-right: 0%;
+    width: 100%;
+  }
+}
+
+@keyframes slide-right {
+    from {
+      margin-left: 0%;
+      width: 100%; 
+    }
+  
+    to {
+      margin-left: -200%;
+      width: 300%;
+    }
+  }

@@ -27,10 +27,20 @@ let player2WrongGuess = "";
 let localGifUrl = "";
 let isPlayerOneSetUpLocally = false;
 let isPlayerTwoSetUpLocally = false;
+let isRoundSwitching = false;
 
 // Game functions
 const game = {
 
+    // Displays live alerts
+    liveUpdate: function (alert) {
+        $("#live-update").text(alert);
+        $("#live-update").toggleClass("live-update-in");   
+        setTimeout(function() {
+            $("#live-update").removeClass().addClass("live-update-out");
+        }, 3000);
+    },
+    
     // Displays player's name on screen
     updatePlayerName: function (spanID, newName) {
         $(spanID).text(newName);
@@ -160,6 +170,9 @@ const game = {
             currentScore: score
         });
         game.clearCurrentAnswers();
+
+        // Resets bottleneck for round switching, so that an infinite loop isn't caused
+        isRoundSwitching = false;
     },
 
     //Update lives remaining
@@ -171,17 +184,24 @@ const game = {
         game.clearCurrentAnswers();
     },
 
-    // Increment round, reset lives, get new gif
+    // Increment round, reset lives, reset answers, get new gif
     nextRound: function() {
+        // Increment round
         currentRound++
         database.ref().update({
             currentRound: currentRound
-        })
-
-        database.ref().child("currentLives").update({
-            currentLives: 5
         });
 
+        // Reset lives
+        database.ref().child("currentLives").update({
+            currentLives: 3
+        });
+
+        // Reset answers
+        database.ref().child("matches").set({
+        })
+
+        // Get new gif
         game.getNewGif();
     }
 }
@@ -196,7 +216,7 @@ const game = {
         currentGifURL: "",
         hasGifURLBeenChosenAlready: false,
         currentRound: 0,
-        currentLives: 5,
+        currentLives: 3,
         currentScore: 0,
         });
     database.ref().child("currentUsers").update({
@@ -236,7 +256,7 @@ const game = {
         $("#current-round").text(round);
 
             // Check if the game is over
-            if (round > 10) {
+            if (round > 5) {
                 console.log("game is over")
                 //game.endGame();
             }
@@ -246,8 +266,8 @@ const game = {
         $("#current-lives").text(lives);
             
             // Check if all lives have been lost
-            if (lives === 0) {
-                console.log("line 245")
+            if (lives === 0 && isRoundSwitching === false) {
+                isRoundSwitching = true;
                 game.nextRound();
             } else {
                 $("#lives-remaining").text(livesRemaining);
@@ -318,11 +338,11 @@ const game = {
 
         // In case the player hasn't chosen a name, don't ping database
         if (player1Name === "") {
-            alert("Choose your name to connect online first!");
+            game.liveUpdate("Choose your name to connect online first!");
         }
         // In case the form is left empty, don't ping database
         else if (answer === "") {
-            alert("Type an answer before submitting!")
+            game.liveUpdate("Type an answer before submitting!")
         } 
             // Otherwise, ping firebase 
             else {
@@ -339,17 +359,17 @@ const game = {
 
                     // If there's no answer yet, display waiting message
                     if (playerTwoAnswer === "") {
-                        alert("Answer submitted. Waiting on player2...")
-                        //update this to status in HTML
+                        game.liveUpdate("Answer submitted. Waiting on player2...");
+     
                     } 
                         // If there is an answer, check if they match
                         else {
                             if (playerOneAnswer === playerTwoAnswer) {
-                                alert("it's a match! you both guessed " + answer + "!");
+                                game.liveUpdate("it's a match! you both guessed " + answer + "!");
                                 game.updateSuccessfulMatches(answer);
                                 game.increaseScore();
                             } else {
-                                alert("the other player guessed " + playerTwoAnswer + " instead");
+                                game.liveUpdate("the other player guessed " + playerTwoAnswer + " instead");
                                 
                                 // Display this player's wrong answer; then, the other's 
                                 game.updateUnsuccessfulMatches(answer, playerTwoAnswer);
@@ -366,11 +386,11 @@ const game = {
 
         // In case the player hasn't chosen a name, don't ping database
         if (player2Name === "") {
-            alert("Choose your name to connect online first!");
+            game.liveUpdate("Choose your name to connect online first!")
         }
         // In case the form is left empty, don't ping database
         else if (answer === "") {
-            alert("Type an answer before submitting!")
+            game.liveUpdate("Type an answer before submitting!");
         } 
             // Otherwise, ping firebase 
             else {
@@ -387,17 +407,17 @@ const game = {
 
                     // If there's no answer yet, display waiting message
                     if (playerOneAnswer === "") {
-                        alert("Answer submitted. Waiting on player 1...")
-                        //update this to status in HTML
+                        game.liveUpdate("Answer submitted. Waiting on player1...");
+                                          
                     } 
                         // If there is an answer, check if they match
                         else {
                             if (playerTwoAnswer === playerOneAnswer) {
-                                alert("it's a match! you both guessed " + answer + "!");
+                                game.liveUpdate("it's a match! you both guessed " + answer + "!");
                                 game.updateSuccessfulMatches(answer);
                                 game.increaseScore();
                             } else {
-                                alert("the other player guessed " + playerOneAnswer + " instead");
+                                game.liveUpdate("the other player guessed " + playerOneAnswer + " instead");
                                 // Display this player's wrong answer; then, the other's 
                                 game.updateUnsuccessfulMatches(answer, playerOneAnswer);
                                 
