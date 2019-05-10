@@ -38,13 +38,13 @@
 
 
 .live-update-in {
-  animation: 2.5s slide-left;
+  animation: 2s slide-left;
   width:100%;
   overflow:hidden;
 }
 
 .live-update-out {
-    animation: 3s slide-right;
+    animation: 2s slide-right;
     width:100%;
     overflow:hidden;
 }

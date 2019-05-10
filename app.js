@@ -198,10 +198,11 @@ const game = {
 
     //Update lives remaining
     decrementLives: function() {
-        livesRemaining--
+        livesRemaining--;
+        $("#lives-remaining").text(livesRemaining);
         database.ref().update({
             livesRemaining
-        })
+        });
         setTimeout(game.clearCurrentAnswers(), 2000);
     },
 
@@ -209,6 +210,7 @@ const game = {
     nextRound: function() {
         // Increment round
         currentRound++
+        $("#current-round").text(currentRound);
         database.ref().update({
             currentRound
         });
@@ -256,7 +258,6 @@ const game = {
 
     // New name, gif url, score, and round listener
     database.ref().on("value", function(snapshot) {
-        console.log("checking snapshot")
         // Only change gif url if it's been newly chosen for the current round
         if (snapshot.val().hasGifURLBeenChosenAlready === true) {
             localGifUrl = snapshot.val().currentGifURL;
@@ -276,24 +277,26 @@ const game = {
         // Update isGameRunningLocally variable
         isGameRunningLocally = snapshot.val().isGameRunning;
 
-        // Update score. Don't wrap this in an if block; it won't update fast enough
+        // Update score. Took out of if block to ensure it happens quickly
         score = snapshot.val().currentScore;
         $("#score").text(score);
         
         // Update round number
-        currentRound = snapshot.val().currentRound;
-        $("#current-round").text(currentRound);
-        if (currentRound > 5) {
-            game.liveUpdate("Game Over")
-            //game.endGame();
-        } else if (currentRound === 0) {
-            console.log("current round is 0");
-        } else {
-            game.liveUpdate("Let round " + currentRound + " begin!");
+        if (currentRound < snapshot.val().currentRound) {
+            currentRound = snapshot.val().currentRound;
+            $("#current-round").text(currentRound);
+            if (currentRound > 5) {
+                game.liveUpdate("Game Over")
+                //game.endGame();
+            } else if (currentRound === 0) {
+                console.log("current round is 0");
+            } else {
+                game.liveUpdate("Let round " + currentRound + " begin!");
+            }
         };
 
         // Update lives
-        if (livesRemaining !== snapshot.val().livesRemaining) {
+        if (livesRemaining > snapshot.val().livesRemaining) {
             livesRemaining = snapshot.val().livesRemaining;
             $("#current-lives").text(livesRemaining);
 
