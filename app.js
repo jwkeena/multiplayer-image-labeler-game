@@ -29,6 +29,7 @@ let localGifUrl = "";
 let isPlayerOneSetUpLocally = false;
 let isPlayerTwoSetUpLocally = false;
 let isRoundSwitching = false;
+let hasPlayerSubmitted = false;
 
 // Game functions
 const game = {
@@ -297,6 +298,7 @@ const game = {
     // Correct answer listener
     database.ref().child("matches/successful").on("child_added", function (snapshot) {
         game.increaseScore();
+        hasPlayerSubmitted = false;
 
         correctAnswer = snapshot.val().answer;
         let newListItem = $("<li>" + correctAnswer + "</li>");
@@ -308,6 +310,7 @@ const game = {
     database.ref().child("matches/unsuccessful/player1").on("child_added", function (snapshot) {
         // Only need to decrement lives once, so I'll put it here and not in the next listener
         game.decrementLives();
+        hasPlayerSubmitted = false;
 
         incorrectAnswer = snapshot.val().answer;
 
@@ -388,7 +391,9 @@ const game = {
         // In case the form is left empty, don't ping database
         else if (answer === "") {
             game.liveUpdate("Type an answer before submitting!")
-        } 
+        } else if (hasPlayerSubmitted === true) {
+            game.liveUpdate("You've already submitted an answer!")
+        }
             // Otherwise, ping firebase 
             else {
                 //Update answer in database
@@ -405,6 +410,7 @@ const game = {
                     // If there's no answer yet, display waiting message
                     if (playerTwoAnswer === "") {
                         game.liveUpdate("Answer submitted. Waiting on player2...");
+                        hasPlayerSubmitted = true;
      
                     } 
                         // If there is an answer, check if they match
@@ -432,7 +438,9 @@ const game = {
         // In case the form is left empty, don't ping database
         else if (answer === "") {
             game.liveUpdate("Type an answer before submitting!");
-        } 
+        } else if (hasPlayerSubmitted === true) {
+            game.liveUpdate("You've already submitted an answer!")
+        }
             // Otherwise, ping firebase 
             else {
                 //Update answer in database
@@ -449,6 +457,7 @@ const game = {
                     // If there's no answer yet, display waiting message
                     if (playerOneAnswer === "") {
                         game.liveUpdate("Answer submitted. Waiting on player1...");
+                        hasPlayerSubmitted = true;
                                           
                     } 
                         // If there is an answer, check if they match
