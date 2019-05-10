@@ -15,10 +15,11 @@ firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 
 // Initialize global variables
+let thisPlayer = "";
 let player1Name = "";
 let player2Name = "";
 let score = 0;
-let livesRemaining = 5;
+let livesRemaining = 3;
 let currentRound = 0;
 let successfulMatches = [];
 let unsuccessfulMatches = [];
@@ -244,37 +245,58 @@ const game = {
             game.displayNewGif();
         }
 
-        player1Name = snapshot.val().currentUsers.player1;
-        player2Name = snapshot.val().currentUsers.player2;
+        if (player1Name !== snapshot.val().currentUsers.player1) {
+            player1Name = snapshot.val().currentUsers.player1;
+            game.liveUpdate(player1Name + " has joined the game")
+        }
+
+        if (player2Name !== snapshot.val().currentUsers.player2) {
+            player2Name = snapshot.val().currentUsers.player2;
+            game.liveUpdate(player2Name + " has joined the game")
+        }
 
         // Update isGameRunningLocally variable
         isGameRunningLocally = snapshot.val().isGameRunning;
 
-        // Update score
-        score = snapshot.val().currentScore;
-        $("#score").text(score);
-
+        // Update score and display matching word
+        if (score !== snapshot.val().currentScore) {
+            score = snapshot.val().currentScore;
+            $("#score").text(score);
+            game.liveUpdate("it's a match! you both guessed " + snapshot.val().playerOneAnswer + "!");
+        }
+        
         // Update round number
-        round = snapshot.val().currentRound;
-        $("#current-round").text(round);
-
-            // Check if the game is over
-            if (round > 5) {
-                console.log("game is over")
+        if (currentRound !== snapshot.val().currentRound) {
+            currentRound = snapshot.val().currentRound;
+            $("#current-round").text(currentRound);
+            if (currentRound > 5) {
+                game.liveUpdate("Game Over")
                 //game.endGame();
+            } else {
+                game.liveUpdate("Let round " + currentRound + " begin!");
             }
+        };
 
         // Update lives
-        lives = snapshot.val().currentLives;
-        $("#current-lives").text(lives);
-            
+        if (livesRemaining !== snapshot.val().currentLives) {
+            livesRemaining = snapshot.val().currentLives;
+            $("#current-lives").text(livesRemaining);
+
             // Check if all lives have been lost
-            if (lives === 0 && isRoundSwitching === false) {
+            if (livesRemaining === 0 && isRoundSwitching === false) {
                 isRoundSwitching = true;
                 game.nextRound();
             } else {
                 $("#lives-remaining").text(livesRemaining);
             } 
+            
+            if (thisPlayer === player1Name) {
+                game.liveUpdate("The other player guessed " + snapshot.val().currentAnswers.playerTwoAnswer + " instead");
+            } else {
+                game.liveUpdate("The other player guessed " + snapshot.val().currentAnswers.playerTwoAnswer + " instead");
+            }
+        }
+        
     });
 
     // Correct answer listener
@@ -287,15 +309,29 @@ const game = {
     // Incorrect answer listener, player1
     database.ref().child("matches/unsuccessful/player1").on("child_added", function (snapshot) {
         incorrectAnswer = snapshot.val().answer;
-        let newListItem = $("<li>" + incorrectAnswer + " (" + player1Name + ")</li>");
-        $("#unsuccessful-matches").append(newListItem);
+
+        if (thisPlayer === player1Name) {
+            let newListItem = $("<li>" + incorrectAnswer + " (" + player1Name + ")</li>");
+            $("#unsuccessful-matches").append(newListItem);
+        } else {
+            let newListItem = $("<li>" + incorrectAnswer + " (" + player2Name + ")</li>");
+            $("#unsuccessful-matches").append(newListItem);
+        }
+
     });
 
     // Incorrect answer listener, player2
     database.ref().child("matches/unsuccessful/player2").on("child_added", function (snapshot) {
         incorrectAnswer = snapshot.val().wrongGuess;
-        let newListItem = $("<li>" + incorrectAnswer + " (" + player2Name + ")</li>");
-        $("#unsuccessful-matches").append(newListItem);
+        
+        if (thisPlayer === player2Name) {
+            let newListItem = $("<li>" + incorrectAnswer + " (" + player2Name + ")</li>");
+            $("#unsuccessful-matches").append(newListItem);
+        } else {
+            let newListItem = $("<li>" + incorrectAnswer + " (" + player1Name + ")</li>");
+            $("#unsuccessful-matches").append(newListItem);
+        }
+        
     });
 
     // Disable other player's controls remotely listener. When firebase updates, check if other player is ready
@@ -368,12 +404,9 @@ const game = {
                         // If there is an answer, check if they match
                         else {
                             if (playerOneAnswer === playerTwoAnswer) {
-                                game.liveUpdate("it's a match! you both guessed " + answer + "!");
                                 game.updateSuccessfulMatches(answer);
                                 game.increaseScore();
                             } else {
-                                game.liveUpdate("the other player guessed " + playerTwoAnswer + " instead");
-                                
                                 // Display this player's wrong answer; then, the other's 
                                 game.updateUnsuccessfulMatches(answer, playerTwoAnswer);
                                 game.decrementLives();
@@ -438,6 +471,7 @@ const game = {
         if (newNamePlayer1 === "") {
             game.liveUpdate("Pick a name first!");
         } else {
+            thisPlayer = newNamePlayer1;
             player1Name = newNamePlayer1;
             database.ref().child("currentUsers").update(
                 {player1: newNamePlayer1}, 
@@ -455,6 +489,7 @@ const game = {
         if (newNamePlayer2 === "") {
             game.liveUpdate("Pick a name first!");
         } else {
+            thisPlayer = newNamePlayer2;
             player2Name = newNamePlayer2;
             database.ref().child("currentUsers").update(
                 {player2: newNamePlayer2}, 
