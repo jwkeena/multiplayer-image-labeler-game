@@ -38,7 +38,7 @@
 
 
 .live-update-in {
-  animation: 3s slide-left;
+  animation: 2.5s slide-left;
   width:100%;
   overflow:hidden;
 }

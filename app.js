@@ -38,7 +38,10 @@ const game = {
         $("#live-update").toggleClass("live-update-in");   
         setTimeout(function() {
             $("#live-update").removeClass().addClass("live-update-out");
-        }, 3000);
+        }, 2500);
+        setTimeout(function() {
+            $("#live-update").removeClass().text("");
+        }, 5500);
     },
     
     // Displays player's name on screen
@@ -432,29 +435,36 @@ const game = {
     // Local name change listeners
     $("#name-set-1").on("click", function () {
         newNamePlayer1 = $("#name-choice-1").val().trim();
-        player1Name = newNamePlayer1;
-        database.ref().child("currentUsers").update(
-            {player1: newNamePlayer1}, 
-        );
-        $("#player-1-status").text("Connected & ready");
-        game.updatePlayerName("#name-1", newNamePlayer1);
-        isPlayerOneSetUpLocally = true;
-        game.setUpPlayerOneLocally();
-        game.readyPlayerOneInFirebase();
+        if (newNamePlayer1 === "") {
+            game.liveUpdate("Pick a name first!");
+        } else {
+            player1Name = newNamePlayer1;
+            database.ref().child("currentUsers").update(
+                {player1: newNamePlayer1}, 
+            );
+            $("#player-1-status").text("Connected & ready");
+            game.updatePlayerName("#name-1", newNamePlayer1);
+            isPlayerOneSetUpLocally = true;
+            game.setUpPlayerOneLocally();
+            game.readyPlayerOneInFirebase();
+        }
     });
 
     $("#name-set-2").on("click", function () {
         newNamePlayer2 = $("#name-choice-2").val().trim();
-        player2Name = newNamePlayer2;
-        database.ref().child("currentUsers").update(
-            {player2: newNamePlayer2}, 
-        );
-        $("#player-2-status").text("Connected & ready");
-        game.updatePlayerName("#name-2", newNamePlayer2);
-        isPlayerTwoSetUpLocally = true;
-        game.setUpPlayerTwoLocally();
-        game.readyPlayerTwoInFirebase();
-
+        if (newNamePlayer2 === "") {
+            game.liveUpdate("Pick a name first!");
+        } else {
+            player2Name = newNamePlayer2;
+            database.ref().child("currentUsers").update(
+                {player2: newNamePlayer2}, 
+            );
+            $("#player-2-status").text("Connected & ready");
+            game.updatePlayerName("#name-2", newNamePlayer2);
+            isPlayerTwoSetUpLocally = true;
+            game.setUpPlayerTwoLocally();
+            game.readyPlayerTwoInFirebase();
+        }
     });
 
     // Remote name change listener. Lets you know when the other player has joined
