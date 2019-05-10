@@ -173,7 +173,7 @@ const game = {
         database.ref().update({
             currentScore: score
         });
-        game.clearCurrentAnswers();
+        setTimeout(game.clearCurrentAnswers(), 2000);
 
         // Resets bottleneck for round switching, so that an infinite loop isn't caused
         isRoundSwitching = false;
@@ -183,9 +183,9 @@ const game = {
     decrementLives: function() {
         livesRemaining--
         database.ref().update({
-            currentLives: livesRemaining
+            livesRemaining
         })
-        game.clearCurrentAnswers();
+        setTimeout(game.clearCurrentAnswers(), 2000);
     },
 
     // Increment round, reset lives, reset answers, get new gif
@@ -193,12 +193,12 @@ const game = {
         // Increment round
         currentRound++
         database.ref().update({
-            currentRound: currentRound
+            currentRound
         });
 
         // Reset lives
-        database.ref().child("currentLives").update({
-            currentLives: 3
+        database.ref().update({
+            livesRemaining: 3
         });
 
         // Reset answers
@@ -214,13 +214,13 @@ const game = {
     $("#name-1").text("");
     $("#name-2").text("");
     database.ref().update({
+        livesRemaining: 3,
         isPlayerOneReady: false,
         isPlayerTwoReady: false,
         isGameRunning: false,
         currentGifURL: "",
         hasGifURLBeenChosenAlready: false,
         currentRound: 0,
-        currentLives: 3,
         currentScore: 0,
         });
     database.ref().child("currentUsers").update({
@@ -262,7 +262,6 @@ const game = {
         if (score !== snapshot.val().currentScore) {
             score = snapshot.val().currentScore;
             $("#score").text(score);
-            game.liveUpdate("it's a match! you both guessed " + snapshot.val().playerOneAnswer + "!");
         }
         
         // Update round number
@@ -272,14 +271,16 @@ const game = {
             if (currentRound > 5) {
                 game.liveUpdate("Game Over")
                 //game.endGame();
+            } else if (currentRound === 0) {
+                return;
             } else {
                 game.liveUpdate("Let round " + currentRound + " begin!");
             }
         };
 
         // Update lives
-        if (livesRemaining !== snapshot.val().currentLives) {
-            livesRemaining = snapshot.val().currentLives;
+        if (livesRemaining !== snapshot.val().livesRemaining) {
+            livesRemaining = snapshot.val().livesRemaining;
             $("#current-lives").text(livesRemaining);
 
             // Check if all lives have been lost
@@ -289,47 +290,52 @@ const game = {
             } else {
                 $("#lives-remaining").text(livesRemaining);
             } 
-            
-            if (thisPlayer === player1Name) {
-                game.liveUpdate("The other player guessed " + snapshot.val().currentAnswers.playerTwoAnswer + " instead");
-            } else {
-                game.liveUpdate("The other player guessed " + snapshot.val().currentAnswers.playerTwoAnswer + " instead");
-            }
         }
         
     });
 
     // Correct answer listener
     database.ref().child("matches/successful").on("child_added", function (snapshot) {
+        game.increaseScore();
+
         correctAnswer = snapshot.val().answer;
         let newListItem = $("<li>" + correctAnswer + "</li>");
         $("#successful-matches").append(newListItem);
+        game.liveUpdate("it's a match! you both guessed " + correctAnswer + "!");
     });
 
-    // Incorrect answer listener, player1
+    // Incorrect answer listener, player1 node
     database.ref().child("matches/unsuccessful/player1").on("child_added", function (snapshot) {
+        // Only need to decrement lives once, so I'll put it here and not in the next listener
+        game.decrementLives();
+
         incorrectAnswer = snapshot.val().answer;
 
         if (thisPlayer === player1Name) {
+            let newListItem = $("<li>" + incorrectAnswer + " (" + thisPlayer + ")</li>");
+            $("#unsuccessful-matches").append(newListItem);
+            // No update because the next event listener will take care of that
+        } else {
             let newListItem = $("<li>" + incorrectAnswer + " (" + player1Name + ")</li>");
             $("#unsuccessful-matches").append(newListItem);
-        } else {
-            let newListItem = $("<li>" + incorrectAnswer + " (" + player2Name + ")</li>");
-            $("#unsuccessful-matches").append(newListItem);
+            game.liveUpdate("The other player guessed " + incorrectAnswer + " instead");
         }
 
     });
 
-    // Incorrect answer listener, player2
+    // Incorrect answer listener, player2 node
     database.ref().child("matches/unsuccessful/player2").on("child_added", function (snapshot) {
+        // Don't need to decrement lives twice
         incorrectAnswer = snapshot.val().wrongGuess;
         
         if (thisPlayer === player2Name) {
+            let newListItem = $("<li>" + incorrectAnswer + " (" + thisPlayer + ")</li>");
+            $("#unsuccessful-matches").append(newListItem);
+            // No update because previous event listener took care of that
+        } else {
             let newListItem = $("<li>" + incorrectAnswer + " (" + player2Name + ")</li>");
             $("#unsuccessful-matches").append(newListItem);
-        } else {
-            let newListItem = $("<li>" + incorrectAnswer + " (" + player1Name + ")</li>");
-            $("#unsuccessful-matches").append(newListItem);
+            game.liveUpdate("The other player guessed " + incorrectAnswer + " instead")
         }
         
     });
@@ -405,7 +411,6 @@ const game = {
                         else {
                             if (playerOneAnswer === playerTwoAnswer) {
                                 game.updateSuccessfulMatches(answer);
-                                game.increaseScore();
                             } else {
                                 // Display this player's wrong answer; then, the other's 
                                 game.updateUnsuccessfulMatches(answer, playerTwoAnswer);
@@ -451,13 +456,10 @@ const game = {
                             if (playerTwoAnswer === playerOneAnswer) {
                                 game.liveUpdate("it's a match! you both guessed " + answer + "!");
                                 game.updateSuccessfulMatches(answer);
-                                game.increaseScore();
                             } else {
                                 game.liveUpdate("the other player guessed " + playerOneAnswer + " instead");
                                 // Display this player's wrong answer; then, the other's 
                                 game.updateUnsuccessfulMatches(answer, playerOneAnswer);
-                                
-                                game.decrementLives();
                             }
                         }
                     })
