@@ -383,6 +383,7 @@ const game = {
     $("#player-1-answer").on("click", function () {
         let answer = $("#answer-1").val().trim().toLowerCase();
         player1WrongGuess = answer;
+        $("#answer-1").val("");
 
         // In case the player hasn't chosen a name, don't ping database
         if (player1Name === "") {
@@ -430,6 +431,7 @@ const game = {
     $("#player-2-answer").on("click", function () {
         let answer = $("#answer-2").val().trim().toLowerCase();
         player2WrongGuess = answer;
+        $("#answer-2").val("");
 
         // In case the player hasn't chosen a name, don't ping database
         if (player2Name === "") {
@@ -479,6 +481,7 @@ const game = {
     // Local name change listeners
     $("#name-set-1").on("click", function () {
         newNamePlayer1 = $("#name-choice-1").val().trim();
+        $("#name-set-2").val("");
         if (newNamePlayer1 === "") {
             game.liveUpdate("Pick a name first!");
         } else {
@@ -497,6 +500,7 @@ const game = {
 
     $("#name-set-2").on("click", function () {
         newNamePlayer2 = $("#name-choice-2").val().trim();
+        $("#name-set-2").val("");
         if (newNamePlayer2 === "") {
             game.liveUpdate("Pick a name first!");
         } else {
