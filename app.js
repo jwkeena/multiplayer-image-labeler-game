@@ -480,6 +480,7 @@ const game = {
 
     // Local name change listeners
     $("#name-set-1").on("click", function () {
+        $(this).attr("disabled", true);
         newNamePlayer1 = $("#name-choice-1").val().trim();
         $("#name-set-2").val("");
         if (newNamePlayer1 === "") {
@@ -499,6 +500,7 @@ const game = {
     });
 
     $("#name-set-2").on("click", function () {
+        $(this).attr("disabled", true);
         newNamePlayer2 = $("#name-choice-2").val().trim();
         $("#name-set-2").val("");
         if (newNamePlayer2 === "") {
