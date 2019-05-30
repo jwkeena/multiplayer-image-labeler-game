@@ -19,8 +19,7 @@ let thisPlayer = "";
 let player1Name = "";
 let player2Name = "";
 let score = 0;
-let livesRemaining = 3;
-let currentRound = 0;
+let livesRemaining = 10;
 let successfulMatches = [];
 let unsuccessfulMatches = [];
 let player1WrongGuess = "";
@@ -45,6 +44,7 @@ const game = {
         }, 5500);
     },
     
+    // Allows enter keypress to submit text, in addition to clicking
     pressEnterToSubmit: function (event, element) {
         if (event && event.keyCode === 13) {
             switch (element) {
@@ -65,16 +65,17 @@ const game = {
     },
 
     // Displays player's name on screen
-    updatePlayerName: function (spanID, newName) {
+    updatePlayerName: function(spanID, newName) {
         $(spanID).text(newName);
     },
 
+    // Puts matching answers into a new node in firebase
     updateSuccessfulMatches: function(answer) {
         database.ref().child("matches/successful").push(
             {answer: answer});
     },
 
-    // Pushes both wrong answers to separate branches, so they can be identified later
+    // Pushes both wrong answers to separate nodes in firebase, so they can be identified later according to which player submitted them
     updateUnsuccessfulMatches: function(answer, wrongGuess) {
         database.ref().child("matches/unsuccessful/player1").push(
             {answer: answer});
@@ -98,11 +99,12 @@ const game = {
               });
     },
 
+    // Grabs gif url from firebase and displays it in the browser
     displayNewGif: function() {
         database.ref().once("value", function (snapshot) {
             let newSrc = snapshot.val().currentGifURL;
             $("#gif").attr("src", newSrc);
-        })
+        });
     },
 
     setUpPlayerOneLocally: function() {
@@ -115,7 +117,7 @@ const game = {
             $("#name-choice-2").attr("disabled", true);
             $("#status-prefix-2").css("background-color", "rgb(90,170,255)");
             $("#answer-2").attr("disabled", true);
-        }
+        };
     },
 
     setUpPlayerTwoLocally: function() {
@@ -128,7 +130,7 @@ const game = {
             $("#name-choice-1").attr("disabled", true);
             $("#status-prefix-1").css("background-color", "rgb(90,170,255)");
             $("#answer-1").attr("disabled", true);
-            }
+            };
     },
 
     readyPlayerOneInFirebase: function() {
@@ -140,8 +142,8 @@ const game = {
                         isPlayerOneReady: true
                     })
                 };
-            }
-        })
+            };
+        });
         
     },
 
@@ -154,8 +156,8 @@ const game = {
                         isPlayerTwoReady: true
                     })
                 };
-            }
-        })
+            };
+        });
         
     },
 
@@ -185,18 +187,20 @@ const game = {
         });
     },
 
-    // Update score
-    increaseScore: function() {
-        // This method works, but .transaction doesn't
-        score++
+    // Update score and lives locally and in firebase
+    increaseScoreAndLives: function() {
+        // This method works, but .transaction doesn't (adds multiple times)
+        score++;
+        livesRemaining++;
         database.ref().update({
-            currentScore: score
+            currentScore: score,
+            livesRemaining: livesRemaining
         });
         setTimeout(game.clearCurrentAnswers(), 2000);
-
+        setTimeout(game.getNewGif(), 3000);
     },
 
-    //Update lives remaining
+    //Update lives remaining in firebase
     decrementLives: function() {
         livesRemaining--;
         $("#lives-remaining").text(livesRemaining);
@@ -204,28 +208,34 @@ const game = {
             livesRemaining
         });
         setTimeout(game.clearCurrentAnswers(), 2000);
+        setTimeout(game.getNewGif(), 3000);
     },
 
-    // Increment round, reset lives, reset answers, get new gif
-    nextRound: function() {
-        // Increment round
-        currentRound++
-        $("#current-round").text(currentRound);
-        database.ref().update({
-            currentRound
-        });
+    // Runs only when game begins
+    beginGame: function() {
 
-        // Reset lives
-        database.ref().update({
-            livesRemaining: 3
-        });
+        // Reset all global variables
+        // Reset all variables in firebase
 
         // Reset answers
         database.ref().child("matches").set({
-        })
+        });
 
         // Get new gif
         game.getNewGif();
+
+    },
+
+    // Ends game and gives option to start fresh
+    endGame: function() {
+        alert("Game over!");
+        console.log("Let's go get Thanos!")
+        // Switch isGameRunning to false locally
+        // Switch isGameRunning to false in firebase
+        // Put user scores in hi score, liveUpdate this
+        // LiveUpdate the game is over
+        // Give option to play again as same players
+        // Reset everything except high scores in firebase, and everything locally (unless that's redundant, since beginGame does this)
     }
 }
 
@@ -233,13 +243,12 @@ const game = {
     $("#name-1").text("");
     $("#name-2").text("");
     database.ref().update({
-        livesRemaining: 3,
+        livesRemaining: 10,
         isPlayerOneReady: false,
         isPlayerTwoReady: false,
         isGameRunning: false,
         currentGifURL: "",
         hasGifURLBeenChosenAlready: false,
-        currentRound: 0,
         currentScore: 0,
         });
     database.ref().child("currentUsers").update({
@@ -256,9 +265,10 @@ const game = {
 
 // Event listeners
 
-    // New name, gif url, score, and round listener
+    // New name, gif url, and score listeners
     database.ref().on("value", function(snapshot) {
-        // Only change gif url if it's been newly chosen for the current round
+
+        // Only change gif url if it's been newly chosen
         if (snapshot.val().hasGifURLBeenChosenAlready === true) {
             localGifUrl = snapshot.val().currentGifURL;
             game.displayNewGif();
@@ -280,33 +290,19 @@ const game = {
         // Update score. Took out of if block to ensure it happens quickly
         score = snapshot.val().currentScore;
         $("#score").text(score);
-        
-        // Update round number
-        if (currentRound < snapshot.val().currentRound) {
-            currentRound = snapshot.val().currentRound;
-            $("#current-round").text(currentRound);
-            if (currentRound > 5) {
-                game.liveUpdate("Game Over")
-                //game.endGame();
-            } else if (currentRound === 0) {
-                console.log("current round is 0");
-            } else {
-                game.liveUpdate("Let round " + currentRound + " begin!");
-            }
+
+        // Update lives in local variable
+        livesRemaining = snapshot.val().livesRemaining;
+
+        // Then check if all lives have been lost
+        if (livesRemaining === 0 || livesRemaining < 0) {
+            // Prevents negative numbers from displaying
+            $("#lives-remaining").text("0");
+            game.endGame();
+        } else {
+            $("#lives-remaining").text(livesRemaining);
         };
-
-        // Update lives
-        if (livesRemaining > snapshot.val().livesRemaining) {
-            livesRemaining = snapshot.val().livesRemaining;
-            $("#current-lives").text(livesRemaining);
-
-            // Check if all lives have been lost
-            if (livesRemaining === 0) {
-                game.nextRound();
-            } else {
-                $("#lives-remaining").text(livesRemaining);
-            } 
-        }
+      
         
     });
 
@@ -388,7 +384,7 @@ const game = {
             $("#player-1-status").text("Connected & ready");
             $("#player-2-status").text("Connected & ready");
 
-            game.nextRound();
+            game.getNewGif();
          }
     });
 
@@ -431,7 +427,7 @@ const game = {
                         else {
                             if (playerOneAnswer === playerTwoAnswer) {
                                 game.updateSuccessfulMatches(answer);
-                                game.increaseScore();
+                                game.increaseScoreAndLives();
                             } else {
                                 // Display this player's wrong answer; then, the other's 
                                 game.updateUnsuccessfulMatches(answer, playerTwoAnswer);
@@ -481,7 +477,7 @@ const game = {
                             if (playerTwoAnswer === playerOneAnswer) {
                                 game.liveUpdate("it's a match! you both guessed " + answer + "!");
                                 game.updateSuccessfulMatches(answer);
-                                game.increaseScore();
+                                game.increaseScoreAndLives();
                             } else {
                                 game.liveUpdate("the other player guessed " + playerOneAnswer + " instead");
                                 // Display this player's wrong answer; then, the other's 
