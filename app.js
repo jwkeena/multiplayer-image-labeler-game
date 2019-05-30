@@ -498,7 +498,10 @@ game.resetVariablesInFirebase();
             game.liveUpdate("Type an answer before submitting!");
         } else if (hasPlayerSubmitted === true) {
             game.liveUpdate("You've already submitted an answer!");
-            snapshot.val().currentUsers.player1 === "" || snapshot.val().currentUsers.player2 === "");
+            // Sumbit dummy data to firebase to prevent both players submitting an answer, but the app doesn't check them
+            database.ref().update({
+                preventGridlock: true
+            });
         }
             // Otherwise, ping firebase 
             else {
