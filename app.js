@@ -250,6 +250,7 @@ const game = {
         $("#name-2").text("");
         $("#player-1-status").text("Not connected yet");
         $("#player-2-status").text("Not connected yet");
+        $("#unsuccessful-matches").text("");
         game.enableAllControls();
     },
 
@@ -545,7 +546,7 @@ game.resetVariablesInFirebase();
         newNamePlayer1 = $("#name-choice-1").val().trim();
         $("#name-choice-1").val("");
         $("#name-choice-2").val("");
-        $(this).attr("disabled", true);
+        $(this).attr("disabled", true); // Fix later
         if (newNamePlayer1 === "") {
             game.liveUpdate("Pick a name first!");
         } else {
