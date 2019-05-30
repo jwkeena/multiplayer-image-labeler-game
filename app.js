@@ -84,6 +84,32 @@ const game = {
         database.ref().child("matches/unsuccessful/player2").push(
             {wrongGuess: wrongGuess});
        },
+    
+    // To prevent answers being submitted at the same time and then not checked against each other. Runs every time an answer is submitted to firebase
+    doubleCheckAnswers: function() {
+        
+        // Wait until other functions are done running and possible gridlock could occur (2 seconds)
+        setTimeout(function() {
+    
+                // Ping firebase to check the answers stored       
+                database.ref().once("value", function (snapshot) {
+                    playerOneAnswer = snapshot.val().currentAnswers.playerOneAnswer;
+                    playerTwoAnswer = snapshot.val().currentAnswers.playerTwoAnswer;
+                    
+                    // Only run function if both players have submitted answers
+                    if (playerOneAnswer === "" || playerTwoAnswer === "") {
+                        return;
+                    } else if (playerOneAnswer === playerTwoAnswer) {
+                        game.updateSuccessfulMatches(playerOneAnswer);
+                        game.increaseScoreAndLives();
+                    } else {
+                        // Display this player's wrong answer; then, the other's 
+                        game.updateUnsuccessfulMatches(playerOneAnswer, playerTwoAnswer);
+                        game.decrementLives();
+                    };
+            }, 2000);
+        });
+    },
 
     // Gets random gif from GIPHY API
     getNewGif: function() {
@@ -145,7 +171,7 @@ const game = {
                 if (isPlayerOneSetUpLocally === true) {
                     database.ref().update({
                         isPlayerOneReady: true
-                    })
+                    });
                 };
             };
         });
@@ -201,7 +227,7 @@ const game = {
             currentScore: score,
             livesRemaining: livesRemaining
         });
-        setTimeout(game.clearCurrentAnswers(), 2000);
+        setTimeout(game.clearCurrentAnswers(), 1000);
         setTimeout(game.getNewGif(), 3000);
     },
 
@@ -212,7 +238,7 @@ const game = {
         database.ref().update({
             livesRemaining
         });
-        setTimeout(game.clearCurrentAnswers(), 2000);
+        setTimeout(game.clearCurrentAnswers(), 1000);
         setTimeout(game.getNewGif(), 3000);
     },
 
@@ -443,13 +469,9 @@ game.resetVariablesInFirebase();
         }
         // In case the form is left empty, don't ping database
         else if (answer === "") {
-            game.liveUpdate("Type an answer before submitting!")
+            game.liveUpdate("Type an answer before submitting!");
         } else if (hasPlayerSubmitted === true) {
-            game.liveUpdate("You've already submitted an answer!")
-            // Sumbit dummy data to firebase to prevent both players submitting an answer, but the app doesn't check them
-            database.ref().update({
-                preventGridlock: true
-            });
+            game.liveUpdate("You've already submitted an answer!");
         }
             // Otherwise, ping firebase 
             else {
@@ -479,10 +501,11 @@ game.resetVariablesInFirebase();
                                 // Display this player's wrong answer; then, the other's 
                                 game.updateUnsuccessfulMatches(answer, playerTwoAnswer);
                                 game.decrementLives();
-                            }
-                        }
-                    })
-            }
+                            };
+                        };
+                    });
+                game.doubleCheckAnswers();
+            };
     });
 
     $("#player-2-answer").on("click", function () {
@@ -499,10 +522,6 @@ game.resetVariablesInFirebase();
             game.liveUpdate("Type an answer before submitting!");
         } else if (hasPlayerSubmitted === true) {
             game.liveUpdate("You've already submitted an answer!");
-            // Sumbit dummy data to firebase to prevent both players submitting an answer, but the app doesn't check them
-            database.ref().update({
-                preventGridlock: true
-            });
         }
             // Otherwise, ping firebase 
             else {
@@ -534,10 +553,11 @@ game.resetVariablesInFirebase();
                                 // Display this player's wrong answer; then, the other's 
                                 game.updateUnsuccessfulMatches(answer, playerOneAnswer);
                                 game.decrementLives();
-                            }
-                        }
-                    })
-            }
+                            };
+                        };
+                    });
+                game.doubleCheckAnswers();
+            };
     });
 
 
