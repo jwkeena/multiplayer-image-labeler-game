@@ -27,6 +27,7 @@ let player2WrongGuess = "";
 let localGifUrl = "";
 let isPlayerOneSetUpLocally = false;
 let isPlayerTwoSetUpLocally = false;
+let isGameRunningLocally = false;
 let hasPlayerSubmitted = false;
 
 // Game functions
@@ -102,8 +103,12 @@ const game = {
     // Grabs gif url from firebase and displays it in the browser
     displayNewGif: function() {
         database.ref().once("value", function (snapshot) {
-            let newSrc = snapshot.val().currentGifURL;
-            $("#gif").attr("src", newSrc);
+            if (snapshot.val().isPlayerOneReady === true && snapshot.val().isPlayerTwoReady === true) {
+                let newSrc = snapshot.val().currentGifURL;
+                $("#gif").attr("src", newSrc);
+            } else {
+                $("#gif").attr("src", "placeholder.png");
+            };
         });
     },
 
@@ -226,64 +231,97 @@ const game = {
 
     },
 
-    // Ends game and gives option to start fresh
-    endGame: function() {
-        alert("Game over!");
-        console.log("Let's go get Thanos!")
-        // Switch isGameRunning to false locally
-        // Switch isGameRunning to false in firebase
-        // Put user scores in hi score, liveUpdate this
-        // LiveUpdate the game is over
+    resetVariablesLocally: function() {
+        thisPlayer = "";
+        player1Name = "";
+        player2Name = "";
+        score = 0;
+        livesRemaining = 5;
+        successfulMatches = [];
+        unsuccessfulMatches = [];
+        player1WrongGuess = "";
+        player2WrongGuess = "";
+        localGifUrl = "";
+        isPlayerOneSetUpLocally = false;
+        isPlayerTwoSetUpLocally = false;
+        isGameRunningLocally = false;
+        hasPlayerSubmitted = false;
+        $("#name-1").text("");
+        $("#name-2").text("");
+        $("#player-1-status").text("Not connected yet");
+        $("#player-2-status").text("Not connected yet");
+        game.enableAllControls();
+    },
+
+    resetVariablesInFirebase: function() {
+        database.ref().update({
+            livesRemaining: 5,
+            isPlayerOneReady: false,
+            isPlayerTwoReady: false,
+            isGameRunning: false,
+            currentGifURL: "",
+            hasGifURLBeenChosenAlready: false,
+            currentScore: 0,
+            });
+        database.ref().child("currentUsers").update({
+            player1: "",
+            player2: ""
+        });
+        database.ref().child("currentAnswers").update({
+            playerOneAnswer: "",
+            playerTwoAnswer: ""
+        });
+        database.ref().child("matches").set({
+        });
+    },
+
+    displayResultsModal: function() {
+        // game.liveUpdate("Game over. Final score: " + score);
         // Give option to play again as same players
         // Reset everything except high scores in firebase, and everything locally (unless that's redundant, since beginGame does this)
+    },
+
+    // Ends game and gives option to start fresh
+    endGame: function() {
+        // game.displayResultsModal();
+        console.log("Let's go get Thanos!");
+        game.resetVariablesLocally();
+        game.resetVariablesInFirebase();
     }
 }
 
-// Functions to run on page load
-    $("#name-1").text("");
-    $("#name-2").text("");
-    database.ref().update({
-        livesRemaining: 5,
-        isPlayerOneReady: false,
-        isPlayerTwoReady: false,
-        isGameRunning: false,
-        currentGifURL: "",
-        hasGifURLBeenChosenAlready: false,
-        currentScore: 0,
-        });
-    database.ref().child("currentUsers").update({
-        player1: "",
-        player2: ""
-    })
-    database.ref().child("currentAnswers").update({
-        playerOneAnswer: "",
-        playerTwoAnswer: ""
-    })
-    database.ref().child("matches").set({
-
-    })
+// Run on page load
+game.resetVariablesInFirebase();
 
 // Event listeners
 
     // New name, gif url, and score listeners
     database.ref().on("value", function(snapshot) {
 
-        // Only change gif url if it's been newly chosen
-        if (snapshot.val().hasGifURLBeenChosenAlready === true) {
+        // Only change gif url if it's been newly chosen and if the game is running
+        if (snapshot.val().hasGifURLBeenChosenAlready === true && snapshot.val().isGameRunning === true) {
             localGifUrl = snapshot.val().currentGifURL;
             game.displayNewGif();
-        }
+        };
 
         if (player1Name !== snapshot.val().currentUsers.player1) {
             player1Name = snapshot.val().currentUsers.player1;
-            game.liveUpdate(player1Name + " has joined the game")
-        }
+            game.liveUpdate(player1Name + " has joined the game");
+        };
 
         if (player2Name !== snapshot.val().currentUsers.player2) {
             player2Name = snapshot.val().currentUsers.player2;
-            game.liveUpdate(player2Name + " has joined the game")
-        }
-
+            game.liveUpdate(player2Name + " has joined the game");
+        };
+        
+        // If the other player disconnects during a game, reset everything locally too
+        if (snapshot.val().isGameRunning === true) {
+            if (snapshot.val().currentUsers.player1 === "" || snapshot.val().currentUsers.player2 === ""){
+                game.liveUpdate("The other player has disconnected!");
+                game.resetVariablesLocally();
+            };
+        };
+        
         // Update isGameRunningLocally variable
         isGameRunningLocally = snapshot.val().isGameRunning;
 
@@ -324,14 +362,14 @@ const game = {
         incorrectAnswer = snapshot.val().answer;
 
         if (thisPlayer === player1Name) {
-            let newListItem = $("<li>" + incorrectAnswer + " (" + thisPlayer + ")</li>");
+            let newListItem = $("<li>" + incorrectAnswer + "</li>");
             $("#unsuccessful-matches").append(newListItem);
             // No update because the next event listener will take care of that
         } else {
-            let newListItem = $("<li>" + incorrectAnswer + " (" + player1Name + ")</li>");
+            let newListItem = $("<li>" + incorrectAnswer + "</li>");
             $("#unsuccessful-matches").append(newListItem);
             game.liveUpdate("The other player guessed " + incorrectAnswer + " instead");
-        }
+        };
 
     });
 
@@ -341,14 +379,14 @@ const game = {
         incorrectAnswer = snapshot.val().wrongGuess;
         
         if (thisPlayer === player2Name) {
-            let newListItem = $("<li>" + incorrectAnswer + " (" + thisPlayer + ")</li>");
+            let newListItem = $("<li>" + incorrectAnswer + "</li>");
             $("#unsuccessful-matches").append(newListItem);
             // No update because previous event listener took care of that
         } else {
-            let newListItem = $("<li>" + incorrectAnswer + " (" + player2Name + ")</li>");
+            let newListItem = $("<li>" + incorrectAnswer + "</li>");
             $("#unsuccessful-matches").append(newListItem);
             game.liveUpdate("The other player guessed " + incorrectAnswer + " instead")
-        }
+        };
         
     });
 
@@ -357,24 +395,28 @@ const game = {
         if (snapshot.val().isPlayerOneReady === true) {
             // If the other player picked player1, player2 is picked automatically
             // Update player status
-            $("#player-1-status").text("Connected & ready")
+            $("#player-1-status").text("Connected & ready");
             isPlayerTwoSetUpLocally = true;
             game.setUpPlayerTwoLocally();
             game.readyPlayerTwoInFirebase();
         } else if (snapshot.val().isPlayerTwoReady === true) { 
             // Update player status
-            $("#player-2-status").text("Connected & ready")
+            $("#player-2-status").text("Connected & ready");
             isPlayerOneSetUpLocally = true;
             game.setUpPlayerOneLocally();
             game.readyPlayerOneInFirebase();
-        } else {
-            // Do nothing
-        }
+        };
     });
    
-    // Listen for one or both players being ready, then start the game
+    // Listen for all players being ready, then start the game
     database.ref().on("value", function(snapshot) {
-        if (snapshot.val().isGameRunning === false && (snapshot.val().currentUsers.player1) && (snapshot.val().currentUsers.player2)){
+        
+        // Kill function if the game isn't running, or if either player hasn't entered a name
+        if (snapshot.val().isGameRunning || snapshot.val().currentUsers.player1 === "" || snapshot.val().currentUsers.player2 === "") {
+            return;
+
+        // Otherwise, start the game
+        } else {
 
             database.ref().update({
                 isGameRunning: true
@@ -492,9 +534,10 @@ const game = {
 
     // Local name change listeners
     $("#name-set-1").on("click", function () {
-        $(this).attr("disabled", true);
         newNamePlayer1 = $("#name-choice-1").val().trim();
-        $("#name-set-2").val("");
+        $("#name-choice-1").val("");
+        $("#name-choice-2").val("");
+        $(this).attr("disabled", true);
         if (newNamePlayer1 === "") {
             game.liveUpdate("Pick a name first!");
         } else {
@@ -512,9 +555,10 @@ const game = {
     });
 
     $("#name-set-2").on("click", function () {
-        $(this).attr("disabled", true);
         newNamePlayer2 = $("#name-choice-2").val().trim();
-        $("#name-set-2").val("");
+        $("#name-choice-1").val("");
+        $("#name-choice-2").val("");
+        $(this).attr("disabled", true);
         if (newNamePlayer2 === "") {
             game.liveUpdate("Pick a name first!");
         } else {
