@@ -19,7 +19,7 @@ let thisPlayer = "";
 let player1Name = "";
 let player2Name = "";
 let score = 0;
-let livesRemaining = 10;
+let livesRemaining = 5;
 let successfulMatches = [];
 let unsuccessfulMatches = [];
 let player1WrongGuess = "";
@@ -243,7 +243,7 @@ const game = {
     $("#name-1").text("");
     $("#name-2").text("");
     database.ref().update({
-        livesRemaining: 10,
+        livesRemaining: 5,
         isPlayerOneReady: false,
         isPlayerTwoReady: false,
         isGameRunning: false,
