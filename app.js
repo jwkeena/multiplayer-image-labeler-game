@@ -39,10 +39,10 @@ const game = {
         $("#live-update").toggleClass("live-update-in");   
         setTimeout(function() {
             $("#live-update").removeClass().addClass("live-update-out");
-        }, 2500);
+        }, 1000);
         setTimeout(function() {
             $("#live-update").removeClass().text("");
-        }, 5500);
+        }, 1900);
     },
     
     // Allows enter keypress to submit text, in addition to clicking
@@ -149,7 +149,6 @@ const game = {
             $("#name-set-2").attr("disabled", true);
             $("#player-2-answer").attr("disabled", true);
             $("#name-choice-2").attr("disabled", true);
-            $("#status-prefix-2").css("background-color", "rgb(90,170,255)");
             $("#answer-2").attr("disabled", true);
         };
     },
@@ -162,7 +161,6 @@ const game = {
             $("#name-set-1").attr("disabled", true);
             $("#player-1-answer").attr("disabled", true);
             $("#name-choice-1").attr("disabled", true);
-            $("#status-prefix-1").css("background-color", "rgb(90,170,255)");
             $("#answer-1").attr("disabled", true);
             };
     },
@@ -201,7 +199,6 @@ const game = {
         $("#name-set-1").attr("disabled", false);
         $("#player-1-answer").attr("disabled", false);
         $("#name-choice-1").attr("disabled", false);
-        $("#status-prefix-1").css("background-color", "rgb(0,123,255)");
         $("#answer-1").attr("disabled", false);
 
         // Re-enable player2's controls
@@ -209,7 +206,6 @@ const game = {
         $("#name-set-2").attr("disabled", false);
         $("#player-2-answer").attr("disabled", false);
         $("#name-choice-2").attr("disabled", false);
-        $("#status-prefix-2").css("background-color", "rgb(0,123,255)");
         $("#answer-2").attr("disabled", false);
     },
     
@@ -279,6 +275,7 @@ const game = {
         $("#name-2").text("");
         $("#player-1-status").text("Not connected yet");
         $("#player-2-status").text("Not connected yet");
+        $("#successful-matches").text("");
         $("#unsuccessful-matches").text("");
         game.enableAllControls();
     },
@@ -306,14 +303,12 @@ const game = {
     },
 
     displayResultsModal: function() {
-        // game.liveUpdate("Game over. Final score: " + score);
-        // Give option to play again as same players
-        // Reset everything except high scores in firebase, and everything locally (unless that's redundant, since beginGame does this)
+        document.getElementById("modal-button").click();
+        $("#final-score").text(score);
     },
 
     // Ends game and gives option to start fresh
     endGame: function() {
-        // game.displayResultsModal();
         console.log("Let's go get Thanos!");
         game.resetVariablesLocally();
         game.resetVariablesInFirebase();
@@ -347,7 +342,8 @@ game.resetVariablesInFirebase();
         // If the other player disconnects during a game, reset everything locally too
         if (snapshot.val().isGameRunning === true) {
             if (snapshot.val().currentUsers.player1 === "" || snapshot.val().currentUsers.player2 === ""){
-                game.liveUpdate("The other player has disconnected!");
+                game.liveUpdate("Connection has been lost!");
+                // alert("Connection has been lost!")
                 game.resetVariablesLocally();
             };
         };
@@ -366,7 +362,7 @@ game.resetVariablesInFirebase();
         if (livesRemaining === 0 || livesRemaining < 0) {
             // Prevents negative numbers from displaying
             $("#lives-remaining").text("0");
-            game.endGame();
+            game.displayResultsModal();
         } else {
             $("#lives-remaining").text(livesRemaining);
         };

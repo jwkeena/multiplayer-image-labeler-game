@@ -7,22 +7,53 @@
     <title>Image Labeler Game</title>
     
     <!-- jQuery link -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     
     <!-- Firebase Reference -->
     <script src="https://www.gstatic.com/firebasejs/5.11.0/firebase.js"></script>
     
     <!-- Bootstrap -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <!-- <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     
     <!-- Custom Stylesheet-->
     <link rel="stylesheet" href="style.css">
     
 </head>
 <body>
- <br>
+<br>
 
-    <div class="container">
+<div class="container">
+    
+    <!-- Modal -->
+    <!-- Button trigger modal -->
+    <button id="modal-button" type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter" style="display: none">
+        Launch demo modal
+    </button>
+      
+      <!-- Modal -->
+      <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLongTitle">Results</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+                <h3>You ran out of lives!</h3>
+                <h5>Your final score is: <b><span id="final-score"></span></b></h5>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="game.endGame();">Reset
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
         
         <div class="row">
 
@@ -81,10 +112,10 @@
                             </div>
                             
                             <div class="col-md-4">
-                                <span id="status-prefix-1">PLAYER 1 STATUS:</span> <span id="player-1-status">Not connected yet</span>                                
+                                <span id="status-prefix-1">PLAYER 1 STATUS:</span> &nbsp; <span id="player-1-status">Not connected yet</span>                                
                             </div>
                             <div class="col-md-5">
-                                <span id="status-prefix-2">PLAYER 2 STATUS:</span> <span id="player-2-status">Not connected yet</span>  
+                                <span id="status-prefix-2">PLAYER 2 STATUS:</span> &nbsp; <span id="player-2-status">Not connected yet</span>  
                             </div>
                             
                         </div>
