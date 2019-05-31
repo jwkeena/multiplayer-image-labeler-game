@@ -39,10 +39,10 @@ const game = {
         $("#live-update").toggleClass("live-update-in");   
         setTimeout(function() {
             $("#live-update").removeClass().addClass("live-update-out");
-        }, 1000);
+        }, 1800);
         setTimeout(function() {
             $("#live-update").removeClass().text("");
-        }, 1900);
+        }, 2800);
     },
     
     // Allows enter keypress to submit text, in addition to clicking
@@ -329,6 +329,7 @@ game.resetVariablesInFirebase();
             game.displayNewGif();
         };
 
+        // Alert when other player has joined the game
         if (player1Name !== snapshot.val().currentUsers.player1) {
             player1Name = snapshot.val().currentUsers.player1;
             game.liveUpdate(player1Name + " has joined the game");
@@ -338,12 +339,24 @@ game.resetVariablesInFirebase();
             player2Name = snapshot.val().currentUsers.player2;
             game.liveUpdate(player2Name + " has joined the game");
         };
+
+        // Alert when other played has submitted an answer
+        playerOneAnswer = snapshot.val().currentAnswers.playerOneAnswer;
+        playerTwoAnswer = snapshot.val().currentAnswers.playerTwoAnswer;
+
+        if (player1Name === snapshot.val().currentUsers.player1 && playerTwoAnswer !== "" && playerOneAnswer === "") {
+            game.liveUpdate(player2Name + " has answered and is waiting on you!");
+        }
+
+        if (player2Name === snapshot.val().currentUsers.player2 && playerOneAnswer !== "" && playerTwoAnswer === "") {
+            game.liveUpdate(player1Name + " has answered and is waiting on you!");
+        }
         
         // If the other player disconnects during a game, reset everything locally too
         if (snapshot.val().isGameRunning === true) {
             if (snapshot.val().currentUsers.player1 === "" || snapshot.val().currentUsers.player2 === ""){
                 game.liveUpdate("Connection has been lost!");
-                // alert("Connection has been lost!")
+                // alert("Connection has been lost! Resetting now...")
                 game.resetVariablesLocally();
             };
         };
@@ -382,38 +395,20 @@ game.resetVariablesInFirebase();
 
     // Incorrect answer listener, player1 node
     database.ref().child("matches/unsuccessful/player1").on("child_added", function (snapshot) {
-        // Only need to decrement lives once, so I'll put it here and not in the next listener
         hasPlayerSubmitted = false;
-
         incorrectAnswer = snapshot.val().answer;
-
-        if (thisPlayer === player1Name) {
-            let newListItem = $("<li>" + incorrectAnswer + "</li>");
-            $("#unsuccessful-matches").append(newListItem);
-            // No update because the next event listener will take care of that
-        } else {
-            let newListItem = $("<li>" + incorrectAnswer + "</li>");
-            $("#unsuccessful-matches").append(newListItem);
-            game.liveUpdate("The other player guessed " + incorrectAnswer + " instead");
-        };
-
+        let newListItem = $("<li>" + incorrectAnswer + "</li>");
+        $("#unsuccessful-matches").append(newListItem);
+        game.liveUpdate("Sorry, that's not what the other player guessed.");
     });
 
     // Incorrect answer listener, player2 node
     database.ref().child("matches/unsuccessful/player2").on("child_added", function (snapshot) {
-        // Don't need to decrement lives twice
+        hasPlayerSubmitted = false;
         incorrectAnswer = snapshot.val().wrongGuess;
-        
-        if (thisPlayer === player2Name) {
-            let newListItem = $("<li>" + incorrectAnswer + "</li>");
-            $("#unsuccessful-matches").append(newListItem);
-            // No update because previous event listener took care of that
-        } else {
-            let newListItem = $("<li>" + incorrectAnswer + "</li>");
-            $("#unsuccessful-matches").append(newListItem);
-            game.liveUpdate("The other player guessed " + incorrectAnswer + " instead")
-        };
-        
+        let newListItem = $("<li>" + incorrectAnswer + "</li>");
+        $("#unsuccessful-matches").append(newListItem);
+        game.liveUpdate("Sorry, that's not what the other player guessed.");
     });
 
     // Disable other player's controls remotely listener. When firebase updates, check if other player is ready
