@@ -92,7 +92,7 @@ const game = {
         setTimeout(function() {
                 console.log("double checking answers");
                 // Ping firebase to check the answers stored       
-                database.ref().once("value", function (snapshot) {
+                database.ref().once("value").then(function (snapshot) {
                     playerOneAnswer = snapshot.val().currentAnswers.playerOneAnswer;
                     playerTwoAnswer = snapshot.val().currentAnswers.playerTwoAnswer;
                     
