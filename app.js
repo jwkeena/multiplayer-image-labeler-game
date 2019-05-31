@@ -482,7 +482,7 @@ game.resetVariablesInFirebase();
 
                     // If there's no answer yet, display waiting message
                     if (playerTwoAnswer === "") {
-                        game.liveUpdate("Answer submitted. Waiting on player2...");
+                        game.liveUpdate("Answer submitted. Waiting on " + player2Name + "...");
                         hasPlayerSubmitted = true;
      
                     } 
@@ -532,7 +532,7 @@ game.resetVariablesInFirebase();
 
                     // If there's no answer yet, display waiting message
                     if (playerOneAnswer === "") {
-                        game.liveUpdate("Answer submitted. Waiting on player1...");
+                        game.liveUpdate("Answer submitted. Waiting on " + player1Name + "...");
                         hasPlayerSubmitted = true;
                                           
                     } 
