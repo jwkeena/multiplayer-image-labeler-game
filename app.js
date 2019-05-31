@@ -90,7 +90,7 @@ const game = {
         
         // Wait until other functions are done running and possible gridlock could occur (2 seconds)
         setTimeout(function() {
-    
+                console.log("double checking answers");
                 // Ping firebase to check the answers stored       
                 database.ref().once("value", function (snapshot) {
                     playerOneAnswer = snapshot.val().currentAnswers.playerOneAnswer;
@@ -98,12 +98,15 @@ const game = {
                     
                     // Only run function if both players have submitted answers
                     if (playerOneAnswer === "" || playerTwoAnswer === "") {
+                        console.log("double check stopped");
                         return;
                     } else if (playerOneAnswer === playerTwoAnswer) {
+                        console.log("double check successful: answers were equal");
                         game.updateSuccessfulMatches(playerOneAnswer);
                         game.increaseScoreAndLives();
                     } else {
                         // Display this player's wrong answer; then, the other's 
+                        console.log("double check successful: answers were not equal")
                         game.updateUnsuccessfulMatches(playerOneAnswer, playerTwoAnswer);
                         game.decrementLives();
                     };
@@ -227,8 +230,8 @@ const game = {
             currentScore: score,
             livesRemaining: livesRemaining
         });
-        setTimeout(game.clearCurrentAnswers(), 1000);
-        setTimeout(game.getNewGif(), 3000);
+        setTimeout(game.clearCurrentAnswers(), 3000);
+        setTimeout(game.getNewGif(), 3500);
     },
 
     //Update lives remaining in firebase
@@ -238,8 +241,8 @@ const game = {
         database.ref().update({
             livesRemaining
         });
-        setTimeout(game.clearCurrentAnswers(), 1000);
-        setTimeout(game.getNewGif(), 3000);
+        setTimeout(game.clearCurrentAnswers(), 3000);
+        setTimeout(game.getNewGif(), 3500);
     },
 
     // Runs only when game begins
