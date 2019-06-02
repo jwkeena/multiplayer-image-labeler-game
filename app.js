@@ -490,7 +490,7 @@ game.resetVariablesInFirebase();
                             };
                         };
                     });
-                setTimeout(game.doubleCheckAnswers, 5000);
+                setTimeout(game.doubleCheckAnswers, 5000); // Remember, three seconds is too slow
             };
     });
 
@@ -542,7 +542,7 @@ game.resetVariablesInFirebase();
                             };
                         };
                     });
-                setTimeout(game.doubleCheckAnswers, 5000);
+                setTimeout(game.doubleCheckAnswers, 5000); // Remember, three seconds is too slow
             };
     });
 
