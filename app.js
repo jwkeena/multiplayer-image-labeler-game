@@ -490,7 +490,7 @@ game.resetVariablesInFirebase();
                             };
                         };
                     });
-                setTimeout(game.doubleCheckAnswers, 3000);
+                setTimeout(game.doubleCheckAnswers, 5000);
             };
     });
 
@@ -542,7 +542,7 @@ game.resetVariablesInFirebase();
                             };
                         };
                     });
-                setTimeout(game.doubleCheckAnswers, 3000);
+                setTimeout(game.doubleCheckAnswers, 5000);
             };
     });
 
