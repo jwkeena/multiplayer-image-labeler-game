@@ -22,6 +22,8 @@ let score = 0;
 let livesRemaining = 5;
 let successfulMatches = [];
 let unsuccessfulMatches = [];
+let player1Answer = "";
+let player2Answer = "";
 let player1WrongGuess = "";
 let player2WrongGuess = "";
 let localGifUrl = "";
@@ -87,30 +89,27 @@ const game = {
     
     // To prevent answers being submitted at the same time and then not checked against each other. Runs every time an answer is submitted to firebase
     doubleCheckAnswers: function() {
-        
-        // Wait until other functions are done running and possible gridlock could occur (2 seconds)
-        setTimeout(function() {
-                // Ping firebase to check the answers stored       
-                database.ref().once("value").then(function (snapshot) {
-                    playerOneAnswer = snapshot.val().currentAnswers.playerOneAnswer;
-                    playerTwoAnswer = snapshot.val().currentAnswers.playerTwoAnswer;
-                    
-                    // Only run function if both players have submitted answers
-                    if (playerOneAnswer === "" || playerTwoAnswer === "") {
-                        console.log("double check stopped");
-                        return;
-                    } else if (playerOneAnswer === playerTwoAnswer) {
-                        console.log("double check successful: answers were equal");
-                        game.updateSuccessfulMatches(playerOneAnswer);
-                        game.increaseScoreAndLives();
-                    } else {
-                        // Display this player's wrong answer; then, the other's 
-                        console.log("double check successful: answers were not equal")
-                        game.updateUnsuccessfulMatches(playerOneAnswer, playerTwoAnswer);
-                        game.decrementLives();
-                    };
-            }, 2000);
-        });
+
+            // Ping firebase to check the answers stored       
+            // database.ref().once("value").then(function (snapshot) {
+                // playerOneAnswer = snapshot.val().currentAnswers.playerOneAnswer;
+                // playerTwoAnswer = snapshot.val().currentAnswers.playerTwoAnswer;
+                
+                // Only run function if both players have submitted answers
+                if (player1Answer === "" || player2Answer === "") {
+                    console.log("double check stopped");
+                    return;
+                } else if (player1Answer === player2Answer) {
+                    console.log("double check successful: answers were equal");
+                    game.updateSuccessfulMatches(player1Answer);
+                    game.increaseScoreAndLives();
+                } else {
+                    // Display this player's wrong answer; then, the other's 
+                    console.log("double check successful: answers were not equal")
+                    game.updateUnsuccessfulMatches(player1Answer, player2Answer);
+                    game.decrementLives();
+                };
+        // });
     },
 
     // Gets random gif from GIPHY API
@@ -161,7 +160,7 @@ const game = {
             $("#player-1-answer").attr("disabled", true);
             $("#name-choice-1").attr("disabled", true);
             $("#answer-1").attr("disabled", true);
-            };
+        };
     },
 
     readyPlayerOneInFirebase: function() {
@@ -185,11 +184,10 @@ const game = {
                 if (isPlayerTwoSetUpLocally === true) {
                     database.ref().update({
                         isPlayerTwoReady: true
-                    })
+                    });
                 };
             };
         });
-        
     },
 
     enableAllControls: function() {
@@ -225,8 +223,8 @@ const game = {
             currentScore: score,
             livesRemaining: livesRemaining
         });
-        setTimeout(game.clearCurrentAnswers, 3000);
-        setTimeout(game.getNewGif, 3500);
+        setTimeout(game.clearCurrentAnswers, 1000);
+        setTimeout(game.getNewGif, 1500);
     },
 
     //Update lives remaining in firebase
@@ -236,20 +234,17 @@ const game = {
         database.ref().update({
             livesRemaining
         });
-        setTimeout(game.clearCurrentAnswers, 3000);
-        setTimeout(game.getNewGif, 3500);
+        setTimeout(game.clearCurrentAnswers, 1000);
+        setTimeout(game.getNewGif, 1500);
     },
 
     // Runs only when game begins
     beginGame: function() {
-
         // Reset all global variables
         // Reset all variables in firebase
-
         // Reset answers
         database.ref().child("matches").set({
         });
-
         // Get new gif
         game.getNewGif();
 
@@ -263,6 +258,8 @@ const game = {
         livesRemaining = 5;
         successfulMatches = [];
         unsuccessfulMatches = [];
+        player1Answer = "";
+        player2Answer = "";
         player1WrongGuess = "";
         player2WrongGuess = "";
         localGifUrl = "";
@@ -385,7 +382,6 @@ game.resetVariablesInFirebase();
     // Correct answer listener
     database.ref().child("matches/successful").on("child_added", function (snapshot) {
         hasPlayerSubmitted = false;
-
         correctAnswer = snapshot.val().answer;
         let newListItem = $("<li>" + correctAnswer + "</li>");
         $("#successful-matches").append(newListItem);
@@ -453,6 +449,7 @@ game.resetVariablesInFirebase();
     // Answer submission listeners
     $("#player-1-answer").on("click", function () {
         let answer = $("#answer-1").val().trim().toLowerCase();
+        player1Answer = answer;
         player1WrongGuess = answer;
         $("#answer-1").val("");
 
@@ -476,8 +473,10 @@ game.resetVariablesInFirebase();
                 // Then check if there's an answer from playerTwo
                 // MUST use .once method, otherwise promise resolves multiple times
                 database.ref().once("value", function (snapshot) {
+                    
                     playerOneAnswer = snapshot.val().currentAnswers.playerOneAnswer;
                     playerTwoAnswer = snapshot.val().currentAnswers.playerTwoAnswer;
+                    player2Answer = snapshot.val().currentAnswers.playerTwoAnswer;
 
                     // If there's no answer yet, display waiting message
                     if (playerTwoAnswer === "") {
@@ -497,12 +496,13 @@ game.resetVariablesInFirebase();
                             };
                         };
                     });
-                game.doubleCheckAnswers();
+                setTimeout(game.doubleCheckAnswers, 3000);
             };
     });
 
     $("#player-2-answer").on("click", function () {
         let answer = $("#answer-2").val().trim().toLowerCase();
+        player2Answer = answer
         player2WrongGuess = answer;
         $("#answer-2").val("");
 
@@ -527,6 +527,7 @@ game.resetVariablesInFirebase();
                 // MUST use .once method, otherwise promise resolves multiple times
                 database.ref().once("value", function (snapshot) {
                     playerOneAnswer = snapshot.val().currentAnswers.playerOneAnswer;
+                    player2Answer = snapshot.val().currentAnswers.playerOneAnswer;
                     playerTwoAnswer = snapshot.val().currentAnswers.playerTwoAnswer;
 
                     // If there's no answer yet, display waiting message
@@ -549,7 +550,7 @@ game.resetVariablesInFirebase();
                             };
                         };
                     });
-                game.doubleCheckAnswers();
+                setTimeout(game.doubleCheckAnswers, 3000);
             };
     });
 
