@@ -90,7 +90,6 @@ const game = {
         
         // Wait until other functions are done running and possible gridlock could occur (2 seconds)
         setTimeout(function() {
-                console.log("double checking answers");
                 // Ping firebase to check the answers stored       
                 database.ref().once("value").then(function (snapshot) {
                     playerOneAnswer = snapshot.val().currentAnswers.playerOneAnswer;
@@ -226,8 +225,8 @@ const game = {
             currentScore: score,
             livesRemaining: livesRemaining
         });
-        setTimeout(game.clearCurrentAnswers(), 3000);
-        setTimeout(game.getNewGif(), 3500);
+        setTimeout(game.clearCurrentAnswers, 3000);
+        setTimeout(game.getNewGif, 3500);
     },
 
     //Update lives remaining in firebase
@@ -237,8 +236,8 @@ const game = {
         database.ref().update({
             livesRemaining
         });
-        setTimeout(game.clearCurrentAnswers(), 3000);
-        setTimeout(game.getNewGif(), 3500);
+        setTimeout(game.clearCurrentAnswers, 3000);
+        setTimeout(game.getNewGif, 3500);
     },
 
     // Runs only when game begins
